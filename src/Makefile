@@ -1,11 +1,16 @@
-exec: project2
-	./project2
+objs=project2.o
+project=project2
+links=ncurses
 
-project2: project2.o
-	gcc -o project2 project2.o -lncurses
+exec: $(project)
+	./$<
 
-project2.o: project2.c
-	gcc -g -c project2.c -O0 -Wall
+$(project): $(objs)
+	gcc -o $(project) $< -l$(links)
 
+$(objs): project2.c
+	gcc -g -c $< -O0 -Wall
+
+.PHONY: clean
 clean:
-	rm -f project2*.o project2 *.out
+	rm -f $(project).o $(project) *.out
