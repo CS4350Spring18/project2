@@ -46,8 +46,9 @@ void editing(WINDOW* my_win, struct Page* page) {
       return;
     }
     //KEY_BACKSPACE
-    else if(key == 8) {
+    else if(key == 8 || key == 127 || key == KEY_BACKSPACE) {
       mvwprintw(my_win,y,x-1," ");
+      backspace(page, y, x-1);
       wmove(my_win,y,x-1);
     }
     //ALT_BACKSPACE
