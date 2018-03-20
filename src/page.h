@@ -39,7 +39,7 @@ void pageInit(struct Page* page, int rows, int columns) {
   for(int i = 0; i < rows; i++) { 
     page->sizes[i] = 0;
     page->lines[i] = malloc( columns * sizeof(char));
-    page->lines[0] = '\0';
+    page->lines[i][0] = '\0';
   }
 
 }
