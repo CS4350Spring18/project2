@@ -14,6 +14,7 @@ void editing(WINDOW* my_win, struct Page* page) {
   //Let user know editing mode is on
   mvwprintw(my_win,row-2,0,"----Editing----");
   mvwchgat(my_win,y,x, 1, A_NORMAL, 0, NULL);
+  if(x > page->sizes[y]) wmove(my_win,y, page->sizes[y]);
   wrefresh(my_win);
 
   //User input loop

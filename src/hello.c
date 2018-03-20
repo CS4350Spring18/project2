@@ -38,6 +38,8 @@ int main() {
   while(key = getch()) {
     getyx(stdscr, y, x);
 
+    //Navigation with Arrowkeys
+    //Isn't bound by page structure, might want to change to restrict movement
     if(key == KEY_UP) {
       chgat(1, A_NORMAL, 0, NULL);
       mvchgat(y-1, x, 1, A_STANDOUT, 0, NULL);     
