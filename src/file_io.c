@@ -7,7 +7,10 @@ void loadFile(char fileName[], struct Page* page) {
    FILE* file = openFile(fileName, "r");
    if (file != NULL) {
       // Load each line from the file into the page.
-      while(fgets(line, c, file) != NULL) printw(line);
+      while(fgets(line, c, file) != NULL) {
+         setRow(page, r++, line);
+         page->numRows++;
+      }
       fclose(file);
    }
 }

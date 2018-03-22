@@ -13,10 +13,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ncurses.h>
+
+#include <string.h>
 
 struct Page {
   char** lines;
-  int* sizes;
+  size_t* sizes;
+  size_t numRows;
 };
 
 //***********************************************/
@@ -46,6 +50,19 @@ void pageInit(struct Page* page, int rows, int columns);
 void insert(struct Page* page, int row, int col, char c);
 
 //***********************************************/
+// insert:
+//   Inserts a character to position on the page
+//
+// Parameters:
+//   page: Refernce to Page object to change
+//   row: row # of the position for the character
+//   col: column # of the position for the character
+//   c: character to insert 
+//
+//***********************************************/
+void setRow(struct Page* page, int row, char line[]);
+
+//***********************************************/
 // backspace:
 //   Removes a charcter from a position on the page
 //
@@ -56,3 +73,4 @@ void insert(struct Page* page, int row, int col, char c);
 //
 //***********************************************/
 void backspace(struct Page* page, int row, int col);
+

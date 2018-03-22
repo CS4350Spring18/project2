@@ -11,6 +11,8 @@ void pageInit(struct Page* page, int rows, int columns) {
     page->lines[i] = malloc( columns * sizeof(char));
     page->lines[i][0] = '\0';
   }
+
+  page->numRows = 0;
 }
 
 void insert(struct Page* page, int row, int col, char c) {
@@ -23,6 +25,11 @@ void insert(struct Page* page, int row, int col, char c) {
   }
 
   page->sizes[row] = size + 1;
+}
+
+void setRow(struct Page* page, int row, char line[]) {
+   page->lines[row] = line;
+   page->sizes[row] = strlen(line);
 }
 
 void backspace(struct Page* page, int row, int col) {
