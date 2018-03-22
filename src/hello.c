@@ -4,6 +4,7 @@
 
 #include "editing.h"
 #include "file_io.h"
+#include "page.h"
 
 int main() {
 //Print contents of dummy file to the screen
@@ -28,7 +29,7 @@ int main() {
    // Scales code section
    // open the file and load the contents into the page.
    loadFile("./text.txt", &my_page);
-   saveFile("./text.txt");
+   saveFile("./text.txt", &my_page);
   
   pageInit(&my_page, row, col);
  
