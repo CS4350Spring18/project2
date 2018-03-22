@@ -3,21 +3,13 @@
 #include <stdlib.h>
 
 #include "editing.h"
+#include "file_io.h"
 
 int main() {
 //Print contents of dummy file to the screen
 //TODO: Change to update the page as well as the screen
-  FILE* fin = fopen("./text.txt", "w+");
 
   initscr();
-  printw("Hello World !!!");
-  int n = 200;
-  char line[n];
-  
-  while(fgets(line, n, fin)) {
-    printw(line);
-    refresh();  
-  }  
 
 //Default "Command Mode"
 //only accepts certain keys for input
@@ -32,6 +24,11 @@ int main() {
   getmaxyx(stdscr,row,col);
 
   struct Page my_page;
+
+   // Scales code section
+   // open the file and load the contents into the page.
+   loadFile("./text.txt", &my_page);
+   saveFile("./text.txt");
   
   pageInit(&my_page, row, col);
  

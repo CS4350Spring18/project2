@@ -5,7 +5,7 @@ links=ncurses
 exec: hello
 	./$<
 
-hello: hello.c editing.h page.h
+hello: hello.c editing.h page.h file_io.h
 	gcc -g -std=c99 -o hello $< -l$(links)
 
 .PHONY: clean
