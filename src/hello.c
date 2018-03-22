@@ -1,23 +1,17 @@
-#include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "editing.h"
+#include "file_io.h"
+#include "page.h"
+
+void updateView(struct Page* page);
 
 int main() {
 //Print contents of dummy file to the screen
 //TODO: Change to update the page as well as the screen
-  FILE* fin = fopen("./text.txt", "w+");
 
   initscr();
-  printw("Hello World !!!");
-  int n = 200;
-  char line[n];
-  
-  while(fgets(line, n, fin)) {
-    printw(line);
-    refresh();  
-  }  
 
 //Default "Command Mode"
 //only accepts certain keys for input
@@ -26,15 +20,21 @@ int main() {
   raw();
   keypad(stdscr, TRUE);
   int key;
-  int y,x;
-  int row,col;
-  getyx(stdscr,y,x);
-  getmaxyx(stdscr,row,col);
+  int y, x;
+  int row, col;
+  getyx(stdscr, y, x);
+  getmaxyx(stdscr, row, col);
 
   struct Page my_page;
-  
+
   pageInit(&my_page, row, col);
- 
+
+   // Scales code section
+   // open the file and load the contents into the page.
+   loadFile("./text.txt", &my_page);
+   updateView(&my_page);
+   saveFile("./text.txt", &my_page);
+
   while(key = getch()) {
     getyx(stdscr, y, x);
 
@@ -72,3 +72,10 @@ int main() {
   return 0;
 }
 
+void updateView(struct Page* page) {
+   int rowCount = page->numRows;
+   printf("%d\n", rowCount);
+   for(int i = 0; i < rowCount; i++)
+      //printw(page->lines[i]);
+      printf("run");
+}
