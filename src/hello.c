@@ -5,7 +5,7 @@
 #include "file_io.h"
 #include "page.h"
 
-void updateView(struct Page* page);
+void updateView(Page* page);
 
 int main(int argc, char* argv[]) {
 
@@ -32,10 +32,9 @@ int main(int argc, char* argv[]) {
    getmaxyx(stdscr, row, col);
 
    Page my_page = pageInit(row, col);
-
-   // Scales code section
    // open the file and load the contents into the page.
    loadFile(&my_page, fileName);
+
    updateView(&my_page);
 
 
@@ -62,12 +61,15 @@ int main(int argc, char* argv[]) {
       }
 
       //Press 'w' key to save the file
-      if (key == 119) saveFile(&my_page, fileName);
+      if (key == 119) {
+         saveFile(&my_page, fileName);
+         mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
+      }
       //Press 'q' key to quit application
       if (key == 113) break;
       //Press 'e' key to switch to editing mode
       if (key == 101) editing(stdscr, &my_page);
-
+      //updateView(&my_page);
       refresh();
    }
    freePage(&my_page);
@@ -75,8 +77,8 @@ int main(int argc, char* argv[]) {
    return 0;
 }
 
-void updateView(struct Page* page) {
+void updateView(Page* page) {
    int rowCount = page->numRows;
    for(int i = 0; i < rowCount; i++)
-      printw(page->lines[i]);
+      printw(strcat(page->lines[i], "\n"));
 }

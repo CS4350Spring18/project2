@@ -17,15 +17,13 @@ void loadFile(Page* page, char fileName[]) {
 
 
 void saveFile(Page* page, char fileName[]) {
-   fprintf(stdout, "Saving file %s\n", fileName);
    FILE* file = openFile(fileName, "w");
    if (file != NULL) {
       int numRows = page->numRows;
       for (int i = 0; i < numRows; i++)
-         fputs(strcat(page->lines[i], "\n"), file);
+         fputs(page->lines[i], file);
       // Insert each row from page into the file.
       fclose(file);
-      fprintf(stdout, "Saved file %s\n", fileName);
    }
 }
 
