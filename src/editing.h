@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
 #include "page.h"
@@ -63,6 +64,41 @@ void editing(WINDOW* my_win, struct Page* page) {
     }
 
     //TODO: Add Return key functionality (Task II.5)
+    else if(key == 10) {
+      // use strlen, strncpy
+      char first_half[50];
+      char second_half[50];
+
+      for(int i = row; i > y+1; i--) {
+        page->lines[i] = page->lines[i-1];
+      }
+
+      for(int i = y; i < row; i++) {
+        wmove(my_win, i+2, 0);
+        clrtoeol();
+        mvwprintw(my_win, i+2, 0, page->lines[i]);
+      }
+      //mvwprintw(my_win, y+2, 0, page->lines[y+1]);
+
+      strncpy(first_half, page->lines[y], x);
+      strncpy(second_half, page->lines[y] + x, page->sizes[y] - x);
+      second_half[page->sizes[y] - x] = '\0';
+      // wait for insert line to be completed and call it here
+      // one call for the first half, the other for the second half
+      // which will be the line below it (y+1)
+      
+      // clear the first line
+      wmove(my_win, y, 0);
+      wclrtoeol(my_win);
+      wmove(my_win, y, x);
+
+      // make the first line the first half of the line
+      mvwprintw(my_win, y, 0, first_half);
+      // make the line under the second half of the line
+      mvwprintw(my_win, y+1, 0, second_half);
+      // move the cursor to the beginning of the second line
+      wmove(my_win,y+1,0);
+    }
 
     //If no special keys, output character
     else if( key >= 32 && key <= 126) {

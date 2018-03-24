@@ -63,8 +63,9 @@ void insert(struct Page* page, int row, int col, char c) {
     if(i == col)
       page->lines[row][i] = c;
   }
-
-  page->sizes[row] = size + 1;
+  if(c != '\n') {
+    page->sizes[row] = size + 1;
+  }
 }
 
 //***********************************************/
