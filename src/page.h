@@ -21,11 +21,13 @@
 
 #include <string.h>
 
-struct Page {
+static const int MAX_COLS = 80;
+
+typedef struct Page {
   char** lines;
-  size_t* sizes;
-  size_t numRows;
-};
+  int* sizes;
+  int numRows;
+} Page;
 
 //***********************************************/
 // pageInit:
@@ -38,7 +40,20 @@ struct Page {
 //   columns: # of columns " " " " " 
 //
 //***********************************************/
-void pageInit(struct Page* page, int rows, int columns);
+Page pageInit(int rows, int columns);
+
+//***********************************************/
+// freePage:
+//   Initializes a Page "object" and allocates
+//   memory for the arrays.
+//
+// Parameters:
+//   page: Refernce to Page object to initiate
+//   rows: # of rows in the window displaying the page
+//   columns: # of columns " " " " " 
+//
+//***********************************************/
+void freePage(Page* page);
 
 //***********************************************/
 // insert:
@@ -51,7 +66,7 @@ void pageInit(struct Page* page, int rows, int columns);
 //   c: character to insert 
 //
 //***********************************************/
-void insert(struct Page* page, int row, int col, char c);
+void insert(Page* page, int row, int col, char c);
 
 //***********************************************/
 // setRow:
@@ -63,7 +78,8 @@ void insert(struct Page* page, int row, int col, char c);
 //   line: new string the line will be set to
 //
 //***********************************************/
-void setRow(struct Page* page, int row, char line[]);
+void setRow(Page* page, int row, char line[]);
+
 
 //***********************************************/
 // backspace:
@@ -75,5 +91,5 @@ void setRow(struct Page* page, int row, char line[]);
 //   col: column # of the position of the character
 //
 //***********************************************/
-void backspace(struct Page* page, int row, int col);
+void backspace(Page* page, int row, int col);
 

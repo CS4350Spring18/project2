@@ -1,6 +1,6 @@
 #include "editing.h"
 
-void editing(WINDOW* my_win, struct Page* page) {
+void editing(WINDOW* my_win, Page* page) {
   int key;
   int y,x;
   int row,col;
@@ -14,7 +14,7 @@ void editing(WINDOW* my_win, struct Page* page) {
   wrefresh(my_win);
 
   //User input loop
-  while(key = getch()) {
+  while((key = getch())) {
     getyx(my_win, y, x);
     //Keep navigation bounded by screen and line length
     if(key == KEY_UP) {

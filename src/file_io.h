@@ -31,7 +31,7 @@
 //   Contains the characters to be loaded into the page.
 //
 //****************************/
-void loadFile(char fileName[], struct Page* page);
+void loadFile(Page* page, char fileName[]);
 
 //****************************/
 // saveFile:
@@ -45,7 +45,7 @@ void loadFile(char fileName[], struct Page* page);
 //   numRows: The number of lines in the page to load into the file.
 //
 //****************************/
-void saveFile(char fileName[], struct Page* page);
+void saveFile(Page* page, char fileName[]);
 
 //****************************/
 // Helper Function: openFile
