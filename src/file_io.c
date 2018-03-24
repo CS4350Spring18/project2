@@ -18,8 +18,11 @@ void loadFile(char fileName[], struct Page* page) {
 
 void saveFile(char fileName[], struct Page* page) {
    fprintf(stdout, "Saving file %s\n", fileName);
-   FILE* file = openFile(fileName, "r+");
+   FILE* file = openFile(fileName, "w");
    if (file != NULL) {
+      size_t numRows = page->numRows;
+      for (int i = 0; i < numRows; i++)
+         fputs(page->lines[i], file);
       // Insert each row from page into the file.
       fclose(file);
       fprintf(stdout, "Saved file %s\n", fileName);

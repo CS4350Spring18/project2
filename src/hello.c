@@ -7,7 +7,12 @@
 
 void updateView(struct Page* page);
 
-int main() {
+int main(int argc, char* argv[]) {
+
+   if (argc != 2) {
+      fprintf(stderr, "%s takes exactly one argument.", argv[0]);
+      exit(1);
+   }
 //Print contents of dummy file to the screen
 //TODO: Change to update the page as well as the screen
 
@@ -31,9 +36,9 @@ int main() {
 
    // Scales code section
    // open the file and load the contents into the page.
-   loadFile("./text.txt", &my_page);
+   loadFile(argv[1], &my_page);
    updateView(&my_page);
-   saveFile("./text.txt", &my_page);
+
 
   while(key = getch()) {
     getyx(stdscr, y, x);
@@ -66,7 +71,7 @@ int main() {
  
     refresh();
   }
-
+   saveFile(argv[1], &my_page);
   endwin();
   
   return 0;

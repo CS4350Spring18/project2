@@ -4,7 +4,7 @@ project=hello
 links=ncurses
 
 exec: $(project)
-	./$<
+	./$< text.txt
 
 $(project): $(objs)
 	gcc -o $(project) $(objs) -l$(links)
