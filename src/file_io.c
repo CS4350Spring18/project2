@@ -1,5 +1,6 @@
 #include "file_io.h"
 
+
 void loadFile(char fileName[], struct Page* page) {
    int r = 0,
        c = 200;
@@ -36,4 +37,3 @@ FILE* openFile(char fileName[], char mode[]) {
    if (temp == NULL) perror("Error opening file");
    return temp;
 }
-

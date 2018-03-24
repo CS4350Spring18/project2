@@ -62,16 +62,16 @@ int main(int argc, char* argv[]) {
       mvchgat(y, x+1, 1, A_STANDOUT, 0, NULL);
     }
 
+    //Press 'w' key to save the file
+    if (key == 119) saveFile(argv[1], &my_page);
     //Press 'q' key to quit application
-    if(key == 113)
-      break;
+    if (key == 113) break;
     //Press 'e' key to switch to editing mode
-    if(key == 101)
-      editing(stdscr, &my_page);
+    if (key == 101) editing(stdscr, &my_page);
  
     refresh();
   }
-   saveFile(argv[1], &my_page);
+   //saveFile(argv[1], &my_page);
   endwin();
   
   return 0;
