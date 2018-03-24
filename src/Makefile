@@ -7,19 +7,19 @@ exec: $(project)
 	./$<
 
 $(project): $(objs)
-	gcc -std=c99 -o $(project) $(objs) -l$(links)
+	gcc -o $(project) $(objs) -l$(links)
 
 hello.o: hello.c 
-	gcc -g -c -Wall $<
+	gcc -g -c -std=c99 -Wall $<
 
 file_io.o: file_io.c
-	gcc -g -c -Wall $<
+	gcc -g -c -std=c99 -Wall $<
 
 page.o: page.c
-	gcc -g -c -Wall $<
+	gcc -g -c -std=c99 -Wall $<
 
 editing.o: editing.c
-	gcc -g -c -Wall $<
+	gcc -g -c -std=c99 -Wall $<
 
 .PHONY: clean
 clean:

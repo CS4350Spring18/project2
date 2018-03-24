@@ -25,6 +25,8 @@ void editing(WINDOW* my_win, struct Page* page) {
     else if(key == KEY_DOWN){
       if(x > page->sizes[y+1])
         x = page->sizes[y+1];
+      if(y >= page->numRows)
+        y = page->numRows - 1;
       wmove(my_win,y+1, x);
     }
     else if(key == KEY_LEFT) {
@@ -43,13 +45,13 @@ void editing(WINDOW* my_win, struct Page* page) {
       return;
     }
     //KEY_BACKSPACE
-    else if(key == 8 || key == 127 || key == KEY_BACKSPACE) {
-      mvwprintw(my_win,y,x-1," ");
-      backspace(page, y, x-1);
-      wmove(my_win,y,x-1);
-    }
+//    else if(key == 8 || key == 127 || key == KEY_BACKSPACE) {
+//      mvwprintw(my_win,y, page->sizes[y]," ");
+//      backspace(page, y, x-1);
+//      wmove(my_win,y,x-1);
+//    }
     //ALT_BACKSPACE
-    else if(key == 127 && x != 0) {
+    else if((key == 127 || key == 8 || key == KEY_BACKSPACE) && x != 0) {
       //Don't delete if at the left of screen
       backspace(page, y, x-1);
       //Need to overwrite the last character on the line, 
@@ -67,7 +69,7 @@ void editing(WINDOW* my_win, struct Page* page) {
       mvwprintw(my_win, y, 0, page->lines[y]);
       wmove(my_win,y,x+1);
     }
-    
+     
     wrefresh(my_win); 
   }
 }

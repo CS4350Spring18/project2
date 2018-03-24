@@ -28,8 +28,9 @@ void insert(struct Page* page, int row, int col, char c) {
 }
 
 void setRow(struct Page* page, int row, char line[]) {
-   page->lines[row] = line;
-   page->sizes[row] = strlen(line);
+ 
+   page->sizes[row] = strlen(line);    
+   strncpy(page->lines[row], line, page->sizes[row]);
 }
 
 void backspace(struct Page* page, int row, int col) {

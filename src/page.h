@@ -6,6 +6,10 @@
 //   a 2D array of characters
 //   (or a 1D array of c-strings)
 //
+// Member Variables:
+//  lines: 2D array of charaacters
+//  sizes: the number of characters by row
+//  numRows: the number of rows that currently have characters
 //
 //
 //****************************/
@@ -50,14 +54,13 @@ void pageInit(struct Page* page, int rows, int columns);
 void insert(struct Page* page, int row, int col, char c);
 
 //***********************************************/
-// insert:
-//   Inserts a character to position on the page
+// setRow:
+//   Replaces a line in page with a new string
 //
 // Parameters:
 //   page: Refernce to Page object to change
-//   row: row # of the position for the character
-//   col: column # of the position for the character
-//   c: character to insert 
+//   row: row # of the line 
+//   line: new string the line will be set to
 //
 //***********************************************/
 void setRow(struct Page* page, int row, char line[]);

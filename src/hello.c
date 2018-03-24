@@ -76,6 +76,5 @@ void updateView(struct Page* page) {
    int rowCount = page->numRows;
    printf("%d\n", rowCount);
    for(int i = 0; i < rowCount; i++)
-      //printw(page->lines[i]);
-      printf("run");
+      printw(page->lines[i]);
 }
