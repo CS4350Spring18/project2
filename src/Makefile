@@ -23,4 +23,4 @@ editing.o: editing.c
 
 .PHONY: clean
 clean:
-	rm -f $(project) *.out *.o
+	rm -f $(project) *.out *.o *.log

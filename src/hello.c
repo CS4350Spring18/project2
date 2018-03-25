@@ -64,12 +64,12 @@ int main(int argc, char* argv[]) {
       if (key == 119) {
          saveFile(&my_page, fileName);
          mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
+         mvwchgat(stdscr, y, x, 1, A_NORMAL, 0, NULL);
       }
       //Press 'q' key to quit application
       if (key == 113) break;
       //Press 'e' key to switch to editing mode
       if (key == 101) editing(stdscr, &my_page);
-      //updateView(&my_page);
       refresh();
    }
    freePage(&my_page);
@@ -79,6 +79,11 @@ int main(int argc, char* argv[]) {
 
 void updateView(Page* page) {
    int rowCount = page->numRows;
-   for(int i = 0; i < rowCount; i++)
+   // Add a newline to the end of the line
+   for(int i = 0; i < rowCount - 1; i++)
       printw(strcat(page->lines[i], "\n"));
+   // Don't add a newline to the last line
+   // This prevents the cursor from rolling
+   // over to a newline at the EOF.
+   printw(page->lines[rowCount - 1]);
 }
