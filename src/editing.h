@@ -29,6 +29,7 @@ void editing(WINDOW* my_win, struct Page* page) {
     else if(key == KEY_DOWN){
       if(x > page->sizes[y+1])
         x = page->sizes[y+1];
+      mvwprintw(my_win, row-3, 0, "%d         ", y);
       wmove(my_win,y+1, x);
     }
     else if(key == KEY_LEFT) {
@@ -69,33 +70,38 @@ void editing(WINDOW* my_win, struct Page* page) {
       char first_half[50];
       char second_half[50];
 
-      for(int i = row; i > y+1; i--) {
+      // move each line down one for the page
+      for(int i = row-3; i > y+1; i--) {
         page->lines[i] = page->lines[i-1];
+        page->sizes[i] = page->sizes[i-1];
       }
 
-      for(int i = y; i < row; i++) {
-        wmove(my_win, i+2, 0);
+      // clear each line and update with the new page lines
+      for(int i = y+2; i < row-2; i++) {
+        wmove(my_win, i, 0);
         clrtoeol();
-        mvwprintw(my_win, i+2, 0, page->lines[i]);
+        mvwprintw(my_win, i, 0, page->lines[i]);
       }
       //mvwprintw(my_win, y+2, 0, page->lines[y+1]);
 
       strncpy(first_half, page->lines[y], x);
+      first_half[x] = '\0';
       strncpy(second_half, page->lines[y] + x, page->sizes[y] - x);
       second_half[page->sizes[y] - x] = '\0';
-      // wait for insert line to be completed and call it here
-      // one call for the first half, the other for the second half
-      // which will be the line below it (y+1)
-      
+
+      page->lines[y] = first_half;
+      page->lines[y+1] = second_half;
+      page->sizes[y+1] = page->sizes[y] -  x;
+      page->sizes[y] = x;
+
       // clear the first line
       wmove(my_win, y, 0);
-      wclrtoeol(my_win);
-      wmove(my_win, y, x);
+      clrtoeol();
 
       // make the first line the first half of the line
-      mvwprintw(my_win, y, 0, first_half);
+      mvwprintw(my_win, y, 0, page->lines[y]);
       // make the line under the second half of the line
-      mvwprintw(my_win, y+1, 0, second_half);
+      mvwprintw(my_win, y+1, 0, page->lines[y+1]);
       // move the cursor to the beginning of the second line
       wmove(my_win,y+1,0);
     }
