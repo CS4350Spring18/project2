@@ -6,17 +6,25 @@
 //   a 2D array of characters
 //   (or a 1D array of c-strings)
 //
+// Member Variables:
+//  lines: 2D array of charaacters
+//  sizes: the number of characters by row
+//  numRows: the number of rows that currently have characters
 //
 //
 //****************************/
-
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ncurses.h>
+
+#include <string.h>
 
 struct Page {
   char** lines;
-  int* sizes;
+  size_t* sizes;
+  size_t numRows;
 };
 
 //***********************************************/
@@ -30,19 +38,7 @@ struct Page {
 //   columns: # of columns " " " " " 
 //
 //***********************************************/
-void pageInit(struct Page* page, int rows, int columns) {
-
-  //Initiate arrays with the size large enough to fill the screen
-  page->lines = malloc( rows * sizeof(char *));
-  page->sizes = malloc( rows * sizeof(int));
- 
-  for(int i = 0; i < rows; i++) { 
-    page->sizes[i] = 0;
-    page->lines[i] = malloc( columns * sizeof(char));
-    page->lines[i][0] = '\0';
-  }
-
-}
+void pageInit(struct Page* page, int rows, int columns);
 
 //***********************************************/
 // insert:
@@ -55,17 +51,19 @@ void pageInit(struct Page* page, int rows, int columns) {
 //   c: character to insert 
 //
 //***********************************************/
-void insert(struct Page* page, int row, int col, char c) {
-  int size = page->sizes[row];
+void insert(struct Page* page, int row, int col, char c);
 
-  for(int i = size; i >= col; i--) {
-    page->lines[row][i+1] = page->lines[row][i];
-    if(i == col)
-      page->lines[row][i] = c;
-  }
-
-  page->sizes[row] = size + 1;
-}
+//***********************************************/
+// setRow:
+//   Replaces a line in page with a new string
+//
+// Parameters:
+//   page: Refernce to Page object to change
+//   row: row # of the line 
+//   line: new string the line will be set to
+//
+//***********************************************/
+void setRow(struct Page* page, int row, char line[]);
 
 //***********************************************/
 // backspace:
@@ -77,13 +75,5 @@ void insert(struct Page* page, int row, int col, char c) {
 //   col: column # of the position of the character
 //
 //***********************************************/
-void backspace(struct Page* page, int row, int col) {
-  int size = page->sizes[row];
-  
-  for(int i = col; i < size+1; i++) {
-    page->lines[row][i] = page->lines[row][i+1];
-  } 
-
-  page->sizes[row] = size - 1;
-}
+void backspace(struct Page* page, int row, int col);
 
