@@ -59,4 +59,4 @@ void saveFile(Page* page, char fileName[]);
 //   mode.
 //
 //****************************/
-FILE* openFile(char fileName[], char mode[]);
+FILE* _openFile(char fileName[], char mode[]);
