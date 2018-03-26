@@ -76,23 +76,26 @@ void editing(WINDOW* my_win, struct Page* page) {
 
     //TODO: Add Return key functionality (Task II.5)
     else if(key == 10) {
-      //char first_half[50];
+      char first_half[50];
       //char second_half[50];
 
       // move each line down one for the page
       for(int i = row-3; i > y+1; i--) {
-        page->lines[i] = page->lines[i-1];
+        //page->lines[i] = page->lines[i-1];
+        strncpy(page->lines[i], page->lines[i-1], page->sizes[i-1]);
         page->sizes[i] = page->sizes[i-1];
       }
 
-      //strncpy(first_half, page->lines[y], x);
+      strncpy(first_half, page->lines[y], x);
       //first_half[x] = '\0';
       //strncpy(second_half, page->lines[y] + x, page->sizes[y] - x);
       //second_half[page->sizes[y] - x] = '\0';
       //page->lines[y] = first_half;
       //page->lines[y+1] = second_half;
       strncpy(page->lines[y+1], page->lines[y] + x, page->sizes[y] - x);
-      strncpy(page->lines[y], page->lines[y], x);
+      //page->lines[y] = first_half;
+      strncpy(page->lines[y], first_half, x);
+      //strncpy(page->lines[y], page->lines[y], x);
       page->sizes[y+1] = page->sizes[y] -  x;
       page->sizes[y] = x;
 
@@ -102,7 +105,7 @@ void editing(WINDOW* my_win, struct Page* page) {
       // clear the second line
       wmove(my_win, y+1, 0);
       clrtoeol();
-
+      
       // update the first line
       if(page->sizes[y] != 0)
         mvwprintw(my_win, y, 0, page->lines[y]);
@@ -111,10 +114,10 @@ void editing(WINDOW* my_win, struct Page* page) {
         mvwprintw(my_win, y+1, 0, page->lines[y+1]);
 
       // clear each line and update with the new page lines
-      for(int i = y+2; i < row-2; i++) {
+      for(int i = 0/*y-2*/; i < row-2; i++) {
         wmove(my_win, i, 0);
-        clrtoeol();
-        if(page->sizes[i] != 0)
+        //clrtoeol();
+        //if(page->sizes[i] != 0)
             mvwprintw(my_win, i, 0, page->lines[i]);
       }
 
