@@ -24,20 +24,28 @@ void editing(WINDOW* my_win, struct Page* page) {
     if(key == KEY_UP) {
       if(x > page->sizes[y-1])
         x = page->sizes[y-1];
+      mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y-1, x);
       wmove(my_win,y-1, x);
     }
     else if(key == KEY_DOWN){
       if(x > page->sizes[y+1])
         x = page->sizes[y+1];
-      mvwprintw(my_win, row-3, 0, "%d         ", y);
+      mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y+1, x);
       wmove(my_win,y+1, x);
     }
     else if(key == KEY_LEFT) {
+      if(x != 0)
+        mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y, x-1);
       wmove(my_win,y, x-1);
     }
     else if(key == KEY_RIGHT) {
-      if(x < page->sizes[y]) 
+      if(x < page->sizes[y]) {
+        mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y, x+1);
         wmove(my_win,y, x+1);
+      }
+      else {
+        wmove(my_win,y, x);
+      }
     }
     //Escape Key
     //quit editing mode back to command mode, remove tag at the bottom 
@@ -49,9 +57,11 @@ void editing(WINDOW* my_win, struct Page* page) {
     }
     //KEY_BACKSPACE
     else if(key == 8 || key == 127 || key == KEY_BACKSPACE) {
-      mvwprintw(my_win,y,x-1," ");
-      backspace(page, y, x-1);
-      wmove(my_win,y,x-1);
+      if(x != 0) {
+        mvwprintw(my_win,y,x-1," ");
+        backspace(page, y, x-1);
+        wmove(my_win,y,x-1);
+      }
     }
     //ALT_BACKSPACE
     else if(key == 127 && x != 0) {
@@ -66,7 +76,6 @@ void editing(WINDOW* my_win, struct Page* page) {
 
     //TODO: Add Return key functionality (Task II.5)
     else if(key == 10) {
-      // use strlen, strncpy
       char first_half[50];
       char second_half[50];
 
@@ -75,14 +84,6 @@ void editing(WINDOW* my_win, struct Page* page) {
         page->lines[i] = page->lines[i-1];
         page->sizes[i] = page->sizes[i-1];
       }
-
-      // clear each line and update with the new page lines
-      for(int i = y+2; i < row-2; i++) {
-        wmove(my_win, i, 0);
-        clrtoeol();
-        mvwprintw(my_win, i, 0, page->lines[i]);
-      }
-      //mvwprintw(my_win, y+2, 0, page->lines[y+1]);
 
       strncpy(first_half, page->lines[y], x);
       first_half[x] = '\0';
@@ -97,12 +98,25 @@ void editing(WINDOW* my_win, struct Page* page) {
       // clear the first line
       wmove(my_win, y, 0);
       clrtoeol();
+      // clear the second line
+      wmove(my_win, y+1, 0);
+      clrtoeol();
 
-      // make the first line the first half of the line
+      // update the first line
       mvwprintw(my_win, y, 0, page->lines[y]);
-      // make the line under the second half of the line
+      // update the second line
       mvwprintw(my_win, y+1, 0, page->lines[y+1]);
+
+      // clear each line and update with the new page lines
+      for(int i = y+2; i < row-2; i++) {
+        wmove(my_win, i, 0);
+        clrtoeol();
+        if(page->sizes[i] != 0)
+            mvwprintw(my_win, i, 0, page->lines[i]);
+      }
+
       // move the cursor to the beginning of the second line
+      mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y+1, 0);
       wmove(my_win,y+1,0);
     }
 
@@ -110,6 +124,7 @@ void editing(WINDOW* my_win, struct Page* page) {
     else if( key >= 32 && key <= 126) {
       insert(page, y, x, key);
       mvwprintw(my_win, y, 0, page->lines[y]);
+      mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y, x+1);
       wmove(my_win,y,x+1);
     }
     
