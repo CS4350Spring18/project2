@@ -116,7 +116,7 @@ void editing(WINDOW* my_win, struct Page* page) {
       // clear each line and update with the new page lines
       for(int i = 0/*y-2*/; i < row-2; i++) {
         wmove(my_win, i, 0);
-        //clrtoeol();
+        clrtoeol();
         //if(page->sizes[i] != 0)
             mvwprintw(my_win, i, 0, page->lines[i]);
       }
