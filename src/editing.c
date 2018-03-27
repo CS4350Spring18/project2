@@ -167,7 +167,7 @@ void editing(WINDOW* my_win, Page* page) {
 
     //If no special keys, output character
     else if( key >= 32 && key <= 126 && x+1 < MAX_COLS) {
-      insert(page, y, x, key);
+      insertChar(page, y, x, key);
       mvwprintw(my_win, y, 0, page->lines[y]);
       mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y, x+1);
       wmove(my_win,y,x+1);
