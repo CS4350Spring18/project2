@@ -14,6 +14,8 @@ int main(int argc, char* argv[]) {
       exit(1);
    }
    char* fileName = argv[1];
+   //Print contents of dummy file to the screen
+   //TODO: Change to update the page as well as the screen
 
    initscr();
 
@@ -26,20 +28,15 @@ int main(int argc, char* argv[]) {
    int key;
    int y, x;
    int row, col;
-
-   // Retrieve information about the screen
    getyx(stdscr, y, x);
    getmaxyx(stdscr, row, col);
 
-   // Create a page with the initial row
-   // and column information.
    Page my_page = pageInit(row, col);
-
-   // Try to open the file and get the contents.
+   // open the file and load the contents into the page.
    loadFile(&my_page, fileName);
 
-   // Update the view if the file has contents.
    updateView(&my_page);
+
 
    while((key = getch())) {
       getyx(stdscr, y, x);
@@ -67,28 +64,21 @@ int main(int argc, char* argv[]) {
       if (key == 119) {
          saveFile(&my_page, fileName);
          mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
-         mvwchgat(stdscr, y, x, 1, A_NORMAL, 0, NULL);
       }
       //Press 'q' key to quit application
       if (key == 113) break;
       //Press 'e' key to switch to editing mode
       if (key == 101) editing(stdscr, &my_page);
+      //updateView(&my_page);
       refresh();
    }
    freePage(&my_page);
    endwin();
-   exit(0);
+   return 0;
 }
 
 void updateView(Page* page) {
    int rowCount = page->numRows;
-   if (rowCount > 0) {
-      // Add a newline to the end of the line
-      for(int i = 0; i < rowCount - 1; i++)
-         printw(strcat(page->lines[i], "\n"));
-      // Don't add a newline to the last line
-      // This prevents the cursor from rolling
-      // over to a newline at the EOF.
-      printw(page->lines[rowCount - 1]);
-   }
+   for(int i = 0; i < rowCount; i++)
+      printw(strcat(page->lines[i], "\n"));
 }

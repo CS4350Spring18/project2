@@ -92,4 +92,3 @@ void setRow(Page* page, int row, char line[]);
 //
 //***********************************************/
 void backspace(Page* page, int row, int col);
-

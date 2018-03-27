@@ -6,4 +6,4 @@
 
 #include "page.h"
 
-void editing(WINDOW* my_win, struct Page* page);
+void editing(WINDOW* my_win, Page* page);
