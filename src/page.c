@@ -13,6 +13,7 @@ Page pageInit(int rows, int columns) {
       page.sizes[i] = 0;
       page.lines[i] = (char *)malloc( columns * sizeof(char));
       page.lines[i][0] = '\0';
+      page.numRows++;
    }
    return page;
 }
@@ -28,7 +29,8 @@ void freePage(Page* page) {
 }
 
 void insert(Page* page, int row, int col, char c) {
-   int rowSize = page->sizes[row];
+  int rowSize = page->sizes[row];
+
    // Check that we aren't adding a character
    // beyond the end of the array.
    if (col < MAX_COLS
@@ -40,7 +42,23 @@ void insert(Page* page, int row, int col, char c) {
       );
       page->lines[row][col] = c;
       page->sizes[row]++;
+      // If the row is at the front of the array
+      //for (int i = rowSize; i >= col; i--) {
+      //   page->lines[row][i+1] = page->lines[row][i];
+      //   if (i == col) page->lines[row][i] = c;
+      //}
+      //page->sizes[row]++;
+   // If beyond the end of the array,
+   // move to the next line.
+   } else {
+      
    }
+   
+  //page->sizes[row] = size + 1;
+   //if(c != '\n') {
+    //page->sizes[row] = size + 1;
+ // }
+
 }
 
 void setRow(Page* page, int row, char line[]) {
@@ -56,4 +74,5 @@ void backspace(struct Page* page, int row, int col) {
     page->lines[row][i] = page->lines[row][i+1];
   page->sizes[row] = size - 1;
 }
+
 
