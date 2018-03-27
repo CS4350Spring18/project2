@@ -1,5 +1,5 @@
-objs=hello.o file_io.o page.o editing.o
-headers=file_io.h page.h editing.h
+objs=hello.o file_io.o page.o editing.o find.o
+headers=file_io.h page.h editing.h find.h
 project=hello
 links=ncurses
 
@@ -19,6 +19,9 @@ page.o: page.c
 	gcc -g -c -std=c99 -Wall $<
 
 editing.o: editing.c
+	gcc -g -c -std=c99 -Wall $<
+
+find.o: find.c
 	gcc -g -c -std=c99 -Wall $<
 
 .PHONY: clean
