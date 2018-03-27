@@ -1,8 +1,8 @@
 project=hello
 objects=hello.o file_io.o page.o editing.o
-links=ncurses
+links=-lncurses
 cc=gcc
-cflags=-g -std=c99 -Wall
+cflags=-Wall -Werror -std=c99 -g -pedantic
 file=text.txt
 
 exec: $(project)
@@ -11,11 +11,11 @@ exec: $(project)
 all: $(objects)
 
 $(project): $(objects)
-	$(cc) -o $(project) $(objects) -l$(links)
+	$(cc) -o $(project) $(objects) $(links)
 
 $(objects): %.o: %.c
 	$(cc) -c $(cflags) $< -o $@
 
 .PHONY: clean
 clean:
-	rm -f $(project) *.out *.o *.log *.txt
+	rm -f $(project) $(objects) *.out *.log *.txt

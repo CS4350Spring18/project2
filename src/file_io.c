@@ -7,13 +7,13 @@ void loadFile(Page* page, char fileName[]) {
    FILE* file = _openFile(fileName, "r");
    // Load lines from a valid file object
    if (file != NULL) {
-      while(fgets(buffer, col, file) != NULL)
+      while(fgets(buffer, col, file))
          setRow(page, row++, buffer);
       page->numRows = row;
       fclose(file);
+   // If there is no valid file object,
+   // create an empty line to use.
    } else {
-      // If there is no valid file object,
-      // create an empty line to use.
       setRow(page, 0, "\0");
       page->numRows = 1;
    }
