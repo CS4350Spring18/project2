@@ -35,17 +35,9 @@ void saveFile(Page* page, char fileName[]) {
    FILE* file = _openFile(fileName, "w");
    if (file != NULL) {
       int numRows = page->numRows;
-      for (int i = 0; i <= numRows; i++) {
-         if(page->lines[i][0] == 0)
-           fputs("\n", file);
-         else
-           fputs(page->lines[i], file);
-      }
-      // Insert each row from page into the file.
-      for (int i = 0; i < numRows; i++){
-         char temp[page->sizes[i]];
-         strncpy(temp, page->lines[i], page->sizes[i]);
-         fputs(strcat(temp, "\n"), file);
+      for (int i = 0; i < numRows; i++) {
+         if (page->lines[i][0] == 0) fputs("\n", file);
+         else fputs(page->lines[i], file);
       }
       fclose(file);
    }
