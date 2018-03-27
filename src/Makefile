@@ -1,13 +1,26 @@
-objs=project2.o
-project=project2
+objs=hello.o file_io.o page.o editing.o
+headers=file_io.h page.h editing.h
+project=hello
 links=ncurses
 
-exec: hello
-	./$<
+exec: $(project)
+	./$< text.txt
 
-hello: hello.c editing.h page.h
-	gcc -g -std=c99 -o hello $< -l$(links)
+$(project): $(objs)
+	gcc -o $(project) $(objs) -l$(links)
+
+hello.o: hello.c 
+	gcc -g -c -std=c99 -Wall $<
+
+file_io.o: file_io.c
+	gcc -g -c -std=c99 -Wall $<
+
+page.o: page.c
+	gcc -g -c -std=c99 -Wall $<
+
+editing.o: editing.c
+	gcc -g -c -std=c99 -Wall $<
 
 .PHONY: clean
 clean:
-	rm -f hello *.out *.o
+	rm -f $(project) *.out *.o *.log
