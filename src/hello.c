@@ -4,6 +4,7 @@
 #include "editing.h"
 #include "file_io.h"
 #include "page.h"
+#include "find.h"
 
 void updateView(struct Page* page);
 
@@ -68,7 +69,10 @@ int main(int argc, char* argv[]) {
     if (key == 113) break;
     //Press 'e' key to switch to editing mode
     if (key == 101) editing(stdscr, &my_page);
- 
+    // Press 'F3' key to switch to search mode
+    if (key == KEY_F(3)) find_and_replace(stdscr, &my_page, findOnly);
+    // Press 'F4' key to switch find and replace
+    if (key == KEY_F(4)) find_and_replace(stdscr, &my_page, findAndReplace);    
     refresh();
   }
    //saveFile(argv[1], &my_page);
