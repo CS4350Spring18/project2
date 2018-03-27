@@ -10,6 +10,7 @@ void editing(WINDOW* my_win, Page* page) {
   //Let user know editing mode is on
   mvwprintw(my_win,row-2,0,"----Editing----");
   mvwchgat(my_win,y,x, 1, A_NORMAL, 0, NULL);
+  if(x > page->sizes[y]) wmove(my_win,y, page->sizes[y]);
   wrefresh(my_win);
 
   //User input loop
@@ -19,12 +20,14 @@ void editing(WINDOW* my_win, Page* page) {
     if(key == KEY_UP) {
       if(x > page->sizes[y-1])
         x = page->sizes[y-1];
-      mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y-1, x);
+      mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  %d", y-1, x, page->numRows);
       wmove(my_win,y-1, x);
     }
     else if(key == KEY_DOWN){
       if(x > page->sizes[y+1])
         x = page->sizes[y+1];
+      if( y >= page->numRows)
+        y = page->numRows - 1;
       mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y+1, x);
       wmove(my_win,y+1, x);
     }
@@ -72,25 +75,25 @@ void editing(WINDOW* my_win, Page* page) {
     //TODO: Add Return key functionality (Task II.5)
     else if(key == 10) {
       char first_half[50];
-      //char second_half[50];
+      char second_half[50];
 
       // move each line down one for the page
       for(int i = row-3; i > y+1; i--) {
-        //page->lines[i] = page->lines[i-1];
-        strncpy(page->lines[i], page->lines[i-1], page->sizes[i-1]);
+        int size = 0;
+        if(page->sizes[i] > page->sizes[i-1])
+            size = page->sizes[i];
+        else
+            size = page->sizes[i-1];
+        for(int j = 0; j <= size; j++)
+            page->lines[i][j] = page->lines[i-1][j];
         page->sizes[i] = page->sizes[i-1];
       }
 
-      strncpy(first_half, page->lines[y], x);
-      //first_half[x] = '\0';
-      //strncpy(second_half, page->lines[y] + x, page->sizes[y] - x);
-      //second_half[page->sizes[y] - x] = '\0';
-      //page->lines[y] = first_half;
-      //page->lines[y+1] = second_half;
-      strncpy(page->lines[y+1], page->lines[y] + x, page->sizes[y] - x);
-      //page->lines[y] = first_half;
-      strncpy(page->lines[y], first_half, x);
-      //strncpy(page->lines[y], page->lines[y], x);
+      for(int i = x; i <= page->sizes[y]; i++){
+        page->lines[y+1][i-x] = page->lines[y][i];
+        page->lines[y][i] = '\0';
+      }
+
       page->sizes[y+1] = page->sizes[y] -  x;
       page->sizes[y] = x;
 
@@ -112,10 +115,9 @@ void editing(WINDOW* my_win, Page* page) {
       for(int i = 0/*y-2*/; i < row-2; i++) {
         wmove(my_win, i, 0);
         clrtoeol();
-        //if(page->sizes[i] != 0)
-            mvwprintw(my_win, i, 0, page->lines[i]);
+        mvwprintw(my_win, i, 0, page->lines[i]);
       }
-
+      page->numRows++;
       // move the cursor to the beginning of the second line
       mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y+1, 0);
       wmove(my_win,y+1,0);
