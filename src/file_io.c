@@ -1,16 +1,21 @@
 #include "file_io.h"
 
 void loadFile(Page* page, char fileName[]) {
-   int r = 0,
-       c = 200;
-   char line[c];
+   int row = 0,
+       col = 200;
+   char buffer[col];
    FILE* file = _openFile(fileName, "r");
+   // Load lines from a valid file object
    if (file != NULL) {
-      // Load each line from the file into the page.
-      while(fgets(line, c, file) != NULL)
-         setRow(page, r++, line);
-      page->numRows = r;
+      while(fgets(buffer, col, file) != NULL)
+         setRow(page, row++, buffer);
+      page->numRows = row;
       fclose(file);
+   } else {
+      // If there is no valid file object,
+      // create an empty line to use.
+      setRow(page, 0, "\0");
+      page->numRows = 1;
    }
 }
 
@@ -20,21 +25,15 @@ void saveFile(Page* page, char fileName[]) {
    if (file != NULL) {
       int numRows = page->numRows;
       for (int i = 0; i <= numRows; i++) {
-         if(page->lines[i][0] == 0)
-           fputs("\n", file);
-         else
-           fputs(page->lines[i], file);
+         if(page->lines[i][0] == 0) fputs("\n", file);
+         else fputs(page->lines[i], file);
       }
-      // Insert each row from page into the file.
       fclose(file);
    }
 }
 
 
 FILE* _openFile(char fileName[], char mode[]) {
-   FILE* temp = NULL;
-   temp = fopen(fileName, mode);
-   if (temp == NULL) perror("Error opening file");
-   return temp;
+   return fopen(fileName, mode);
 }
 
