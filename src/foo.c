@@ -7,6 +7,7 @@
 #include "page_struct.h"
 #include "page_ops.h"
 #include "find.h"
+#include "newline.h"
 
 static int row;
 static int col;
@@ -160,7 +161,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
 
       // ENTER KEY FUNCTIONALITY
       case 10:
-         if(yPos < row-3) {
+         /*if(yPos < row-3) {
             // move each line down one for the page
             for(int i = row-3; i > yPos+1; i--) {
               int size = 0;
@@ -196,7 +197,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
               mvwprintw(stdscr, yPos+1, 0, page->lines[yPos+1]);
 
             // clear each line and update with the new page lines
-            for(int i = 1/*yPos-2*/; i < row-2; i++) {
+            for(int i = 1; i < row-2; i++) {
               wmove(stdscr, i, 0);
               clrtoeol();
               mvwprintw(stdscr, i, 0, page->lines[i]);
@@ -205,8 +206,20 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
             // move the cursor to the beginning of the second line
             mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos+1, 0);
             wmove(stdscr,yPos+1,0);
-         }
-         break;
+         }*/
+          // clear each line and update with the new page lines
+          if(yPos < row-3) {
+            newLine(page, row, xPos, yPos);
+            for(int i = 1; i < row-2; i++) {
+              wmove(stdscr, i, 0);
+              clrtoeol();
+              mvwprintw(stdscr, i, 0, page->lines[i]);
+            }
+            // move the cursor to the beginning of the second line
+            mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos+1, 0);
+            wmove(stdscr,yPos+1,0);
+          }
+          break;
 
       // Press 'F4' key to switch find and replace
       case KEY_F(4):
