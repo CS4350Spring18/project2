@@ -1,6 +1,6 @@
-#include "copy.c"
+#include "copy.h"
 
-int copy(WINDOW* my_win,int &length, struct Page* page){
+int copy(WINDOW* my_win,int length, Page* page){
 	char *myString[length+1];
 
 	int key;
@@ -16,12 +16,12 @@ int copy(WINDOW* my_win,int &length, struct Page* page){
 		length = length-1;
 
 	//reads actual line with input length into myString
-	winnstr(WINDOW *my_win, *myString, length);
+	winnstr(my_win, myString, length);
 
 	return myString;
 }
 
-void paste(WINDOW* my_win, char &myString, struct Page* page){
+void paste(WINDOW* my_win, char myString,  Page* page){
 	int key;
 	int y,x;
 	int row,col;
@@ -29,7 +29,7 @@ void paste(WINDOW* my_win, char &myString, struct Page* page){
 	getyx(my_win,y,x);
 	getmaxyx(my_win,row,col);
 
-	while( myString = getch()){
+	while((myString = getch())){
 		if ( x > page->sizes[y]){
 			wmove(my_win,y,x+1);
 		}
