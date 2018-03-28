@@ -12,12 +12,13 @@ static int row;
 static int col;
 static char* fileName;
 static WINDOW* screen;
-static char* savedText;
-static char* copiedText;
 
 void updateView(Page* page);
 
 static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
+   int count = 1;
+   char* savedText[count];
+   char* copiedText[count];
    switch(ch) {
       case KEY_UP:
          chgat(1, A_NORMAL, 0, NULL);
@@ -29,8 +30,10 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
             init_pair(1, COLOR_RED, COLOR_BLACK);
             attron(COLOR_PAIR(1));
             //copy text
-            winnstr(screen, savedText, yPos);
+           // winnstr(screen, savedText[count], yPos);
+            savedText[count] = winch(screen);
             refresh();
+            count++;
          }
          break;
 
@@ -44,8 +47,10 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
             init_pair(1, COLOR_RED, COLOR_BLACK);
             attron(COLOR_PAIR(1));
             //copy text
-            winnstr(screen, savedText, yPos);
+           // winnstr(screen, savedText[count], yPos);
+            savedText[count] = winch(screen);
             refresh();
+            count++;
          }
          break;
 
@@ -59,8 +64,9 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
             init_pair(1, COLOR_RED, COLOR_BLACK);
             attron(COLOR_PAIR(1));
             //copy text
-            winnstr(screen, savedText, yPos);
+            savedText[count] = winch(screen);
             refresh();
+            count++;
          }
          break;
 
@@ -74,8 +80,10 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
             init_pair(1, COLOR_RED, COLOR_BLACK);
             attron(COLOR_PAIR(1));
             //copy text
-            winnstr(screen, savedText, yPos);
+      //      winnstr(screen, savedText[count], yPos);
+            savedText[count] = winch(screen);
             refresh();
+            count++;
          }   
          break;
 
@@ -89,20 +97,28 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
 
       case '[':
          if (mode == 'v'){
-            copiedText = savedText;
+          //  *copiedText = *savedText;
+            savedText[1] = 'n';
+            break;
          }
+         break;
       //case to paste text in mode v
       case ']':
          if (mode == 'c'){
-            while((copiedText = getch())){
-               if ( xPos > page->sizes[yPos]){
-                  wmove(screen, yPos, xPos + 1);
-               }
-               else{
-                  wmove(screen, yPos + 1, xPos);
-               }
+            savedText[0] = 'y';
+            for(int i = 0; i <= count; i++){
+              // if ( xPos > page->sizes[yPos]){
+              //    wprintw(screen, "%c", savedText[i]);
+              //    wmove(screen, yPos, xPos + 1);
+              // }
+              // else{
+              wprintw(screen, "%c", savedText[i]);
+              wmove(screen, yPos, xPos + 1);
+              // }
             }
+            break;
          }
+         break;
       case 'q':
          if (mode == 'c') return -1;
 

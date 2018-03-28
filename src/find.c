@@ -77,7 +77,7 @@ bool handle_search_input(WINDOW *win, struct Page *page, int key,char searchStr[
 	    return false;
 	}
 
-	if (key == 10) {
+	if (key == 100) {
 	  // Find text, and highlight matches
 	  size_t numRows = page->numRows;
 
@@ -136,7 +136,7 @@ bool handle_replace_input(WINDOW *win, struct Page *page, int key,const char sea
 	    return false;
 	}
 
-	if (key == 10) {
+	if (key == 100) {
 	  // Find text, and highlight matches
 	  // Change text when enter is pressed
 	  size_t numRows = page->numRows;
