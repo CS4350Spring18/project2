@@ -60,6 +60,15 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
          if(mode == 'e') {
            mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos+1, xPos);
          }
+
+         if(mode == 'v'){
+            //highlight text
+            start_color();
+            init_pair(1, COLOR_RED, COLOR_BLACK);
+            attron(COLOR_PAIR(1));
+            refresh();
+            attroff(COLOR_PAIR(1));
+         }
          wmove(stdscr,yPos+1, xPos);
          break;
 
@@ -70,6 +79,14 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
            if(mode == 'e') {
              mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos-1);
            }
+           if(mode == 'v'){
+             //highlight text
+             start_color();
+             init_pair(1, COLOR_RED, COLOR_BLACK);
+             attron(COLOR_PAIR(1));
+             refresh();
+             attroff(COLOR_PAIR(1));
+          }
            wmove(stdscr,yPos, xPos-1);
          }
          break;
@@ -81,8 +98,17 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
            if(xPos < page->sizes[yPos]) {
              if(mode == 'e')
                mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos+1);
-             wmove(stdscr,yPos, xPos+1);
+            if(mode == 'v'){
+               //highlight text
+               start_color();
+               init_pair(1, COLOR_RED, COLOR_BLACK);
+               attron(COLOR_PAIR(1));
+               refresh();
+               attroff(COLOR_PAIR(1));
+            }
+            wmove(stdscr,yPos, xPos+1);
            }
+
            else
              wmove(stdscr,yPos, xPos);
          }
