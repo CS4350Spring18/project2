@@ -259,7 +259,7 @@ int main(int argc, char* argv[]) {
 
    // Header line
    mvwprintw(stdscr,0,0,"Group #3, editing file %s", fileName);
-   wmove(stdscr, 1, x);
+   wmove(stdscr, 0, x);
 
    // Open the file and load the contents into the page.
    loadFile(&page, fileName);
@@ -290,7 +290,11 @@ int main(int argc, char* argv[]) {
 
 void updateView(Page* page) {
    int rowCount = page->numRows;
-   for(int i = 0; i < rowCount; i++)
-      printw(strcat(page->lines[i], "\n"));
+   for(int i = 0; i < rowCount+2; i++) {
+     if(i == rowCount+1)
+         printw(page->lines[i]);
+     else
+         printw(strcat(page->lines[i], "\n"));
+   }
    refresh();
 }
