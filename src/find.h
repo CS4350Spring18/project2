@@ -1,7 +1,8 @@
 #pragma once
 
-#include "page.h"
+#include <ncurses.h>
+#include "page_struct.h"
 
 enum FindMode { findOnly, findAndReplace};
 
-void find_and_replace(WINDOW *win, struct Page *page, enum FindMode findMode);
+void find_and_replace(WINDOW *win, Page *page, enum FindMode findMode);

@@ -1,29 +1,21 @@
-objs=hello.o file_io.o page.o editing.o find.o
-headers=file_io.h page.h editing.h find.h
-project=hello
-links=ncurses
+project=foo
+objects=foo.o save_file.o load_file.o editing.o page_ops.o find.o
+links=-lncurses
+cc=gcc
+cflags=-Wall -std=c99 -g -pedantic
+file=text.txt
 
 exec: $(project)
-	./$< text.txt
+	./$< $(file)
 
-$(project): $(objs)
-	gcc -o $(project) $(objs) -l$(links)
+all: $(objects)
 
-hello.o: hello.c 
-	gcc -g -c -std=c99 -Wall $<
+$(project): $(objects)
+	$(cc) -o $(project) $(objects) $(links)
 
-file_io.o: file_io.c
-	gcc -g -c -std=c99 -Wall $<
-
-page.o: page.c
-	gcc -g -c -std=c99 -Wall $<
-
-editing.o: editing.c
-	gcc -g -c -std=c99 -Wall $<
-
-find.o: find.c
-	gcc -g -c -std=c99 -Wall $<
+$(objects): %.o: %.c
+	$(cc) -c $(cflags) $< -o $@
 
 .PHONY: clean
 clean:
-	rm -f $(project) *.out *.o
+	rm -f $(project) $(objects) *.out *.log *.txt
