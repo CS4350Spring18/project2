@@ -118,7 +118,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
            wmove(stdscr,yPos,xPos-1);
          }
          // If at the left side of the string, need to append lines
-         else if(y > 1 && page->sizes[yPos-1] + page->sizes[yPos] + 1 < MAX_COLS) {
+         else if(yPos > 1 && page->sizes[yPos-1] + page->sizes[yPos] + 1 < MAX_COLS) {
            for(int i = 0; i < page->sizes[yPos]; i++) {
              page->lines[yPos-1][page->sizes[yPos-1]+i] = page->lines[yPos][i];
            }
@@ -145,12 +145,12 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
              clrtoeol();
              mvwprintw(stdscr, i, 0, page->lines[i]);
            }
-           page->numRows++;
+           page->numRows--;
            // move the cursor to the beginning of the second line
            mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos-1, page->sizes[yPos-1]);
            wmove(stdscr,yPos-1,old_xPos);
          }
-         else if(y == 1) {
+         else if(yPos == 1) {
            //mvwprintw(stdscr,row-1,0,"Error: row would be too long if append happens.");
            //wmove(stdscr,yPos,xPos);  
          }
