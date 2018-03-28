@@ -182,6 +182,8 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
             page->sizes[yPos+1] = page->sizes[yPos] -  xPos;
             page->sizes[yPos] = xPos;
 
+            page->numRows++;
+
             // clear the first line
             wmove(stdscr, yPos, 0);
             clrtoeol();
@@ -202,13 +204,27 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
               clrtoeol();
               mvwprintw(stdscr, i, 0, page->lines[i]);
             }
-            page->numRows++;
+
             // move the cursor to the beginning of the second line
             mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos+1, 0);
             wmove(stdscr,yPos+1,0);
          }*/
           // clear each line and update with the new page lines
           if(yPos < row-3) {
+            // clear the first line
+            wmove(stdscr, yPos, 0);
+            clrtoeol();
+            // clear the second line
+            wmove(stdscr, yPos+1, 0);
+            clrtoeol();
+            
+            // update the first line
+            if(page->sizes[yPos] != 0)
+              mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
+            // update the second line
+            if(page->sizes[yPos+1] != 0)
+              mvwprintw(stdscr, yPos+1, 0, page->lines[yPos+1]);
+
             newLine(page, row, xPos, yPos);
             for(int i = 1; i < row-2; i++) {
               wmove(stdscr, i, 0);
