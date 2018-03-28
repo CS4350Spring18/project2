@@ -1,9 +1,2 @@
-hello world
-hi there
-
-
-
-nice job
-   hey man okay
-
-yay
+hello 
+cool stuff world

@@ -148,10 +148,6 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
            mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos-1, page->sizes[yPos-1]);
            wmove(stdscr,yPos-1,old_xPos);
          }
-         else if(yPos == 1) {
-           //mvwprintw(stdscr,row-1,0,"Error: row would be too long if append happens.");
-           //wmove(stdscr,yPos,xPos);  
-         }
          // appending the line and the one below would exPosceed MAX_COLS
          else {
            mvwprintw(stdscr,row-1,0,"Error: row would be too long if append happens.");
@@ -161,71 +157,10 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
 
       // ENTER KEY FUNCTIONALITY
       case 10:
-         /*if(yPos < row-3) {
-            // move each line down one for the page
-            for(int i = row-3; i > yPos+1; i--) {
-              int size = 0;
-              if(page->sizes[i] > page->sizes[i-1])
-                  size = page->sizes[i];
-              else
-                  size = page->sizes[i-1];
-              for(int j = 0; j <= size; j++)
-                  page->lines[i][j] = page->lines[i-1][j];
-              page->sizes[i] = page->sizes[i-1];
-            }
-
-            for(int i = xPos; i <= page->sizes[yPos+1]; i++){
-              page->lines[yPos+1][i-xPos] = page->lines[yPos][i];
-              page->lines[yPos][i] = '\0';
-            }
-
-            page->sizes[yPos+1] = page->sizes[yPos] -  xPos;
-            page->sizes[yPos] = xPos;
-
-            page->numRows++;
-
-            // clear the first line
-            wmove(stdscr, yPos, 0);
-            clrtoeol();
-            // clear the second line
-            wmove(stdscr, yPos+1, 0);
-            clrtoeol();
-            
-            // update the first line
-            if(page->sizes[yPos] != 0)
-              mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
-            // update the second line
-            if(page->sizes[yPos+1] != 0)
-              mvwprintw(stdscr, yPos+1, 0, page->lines[yPos+1]);
-
-            // clear each line and update with the new page lines
-            for(int i = 1; i < row-2; i++) {
-              wmove(stdscr, i, 0);
-              clrtoeol();
-              mvwprintw(stdscr, i, 0, page->lines[i]);
-            }
-
-            // move the cursor to the beginning of the second line
-            mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos+1, 0);
-            wmove(stdscr,yPos+1,0);
-         }*/
           // clear each line and update with the new page lines
           if(yPos < row-3) {
-            // clear the first line
-            wmove(stdscr, yPos, 0);
-            clrtoeol();
-            // clear the second line
-            wmove(stdscr, yPos+1, 0);
-            clrtoeol();
-            
-            // update the first line
-            if(page->sizes[yPos] != 0)
-              mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
-            // update the second line
-            if(page->sizes[yPos+1] != 0)
-              mvwprintw(stdscr, yPos+1, 0, page->lines[yPos+1]);
-
             newLine(page, row, xPos, yPos);
+
             for(int i = 1; i < row-2; i++) {
               wmove(stdscr, i, 0);
               clrtoeol();
@@ -246,16 +181,22 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
       case '?': break;
       default: 
          if( ch >= 32 && ch <= 126 && xPos+1 < MAX_COLS) {
-            if (mode == 'c') {
-               saveFile(page, fileName);
-               mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
-               wmove(stdscr, yPos, xPos);
-               break;
+            if(mode == 'c') {
+              if(ch ==  'w') {
+                saveFile(page, fileName);
+                mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
+                wmove(stdscr, yPos, xPos);
+              }
+              if(ch == 'q') {
+                return -1;
+              }
             }
-            insertChar(page, yPos, xPos, ch);
-            mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
-            mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos+1);
-            wmove(stdscr,yPos,xPos+1);
+            else {
+              insertChar(page, yPos, xPos, ch);
+              mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
+              mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos+1);
+              wmove(stdscr,yPos,xPos+1);
+            }
          }
          break;
    }
