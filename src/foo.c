@@ -8,77 +8,104 @@
 #include "page_ops.h"
 #include "find.h"
 
+static int row;
+static int col;
+static char* fileName;
+
 void updateView(Page* page);
+
+static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
+   switch(ch) {
+      case KEY_UP:
+         chgat(1, A_NORMAL, 0, NULL);
+         mvchgat(yPos-1, xPos, 1, A_STANDOUT, 0, NULL);
+         break;
+
+      case KEY_DOWN:
+         chgat(1, A_NORMAL, 0, NULL);
+         mvchgat(yPos + 1, xPos, 1, A_STANDOUT, 0, NULL);
+         break;
+
+      case KEY_LEFT:
+         chgat(1, A_NORMAL, 0, NULL);
+         mvchgat(yPos, xPos - 1, 1, A_STANDOUT, 0, NULL);
+         break;
+
+      case KEY_RIGHT:
+         chgat(1, A_NORMAL, 0, NULL);
+         mvchgat(yPos, xPos + 1, 1, A_STANDOUT, 0, NULL);
+         break;
+      case 'w':
+         if (mode == 'c') {
+            saveFile(page, fileName);
+            mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
+            wmove(stdscr, yPos - 1, xPos);
+            break;
+         }
+      case 'q':
+         if (mode == 'c') return -1;
+
+      case KEY_F(3):
+         find_and_replace(stdscr, &page, findOnly);
+         break;
+
+      // Press 'F4' key to switch find and replace
+      case KEY_F(4):
+         find_and_replace(stdscr, &page, findAndReplace);
+         break;
+
+      case '?': break;
+      default: break;
+   }
+   return 0;
+}
+
 
 int main(int argc, char* argv[]) {
 
+   // Notify the user if a file name is not provided and exit.
    if (argc != 2) {
       fprintf(stderr, "%s takes exactly one argument.", argv[0]);
       exit(1);
    }
-   char* fileName = argv[1];
-   //Print contents of dummy file to the screen
-   //TODO: Change to update the page as well as the screen
+
+   // Else run the editor
+   int ch,
+       mode = 'c';
+   int y, x;
+   fileName = argv[1];
 
    initscr();
-
-   //Default "Command Mode"
-   //only accepts certain keys for input
-   //cursor highlights text instead of underlines
    noecho();
-   raw();
+   cbreak();
    keypad(stdscr, TRUE);
-   int key;
-   int y, x;
-   int row, col;
-   getyx(stdscr, y, x);
    getmaxyx(stdscr, row, col);
 
-   Page my_page = pageInit(row, col);
-   // open the file and load the contents into the page.
-   loadFile(&my_page, fileName);
+   // Create a page with the dimensions for the screen
+   Page page = pageInit(row, col);
 
-   updateView(&my_page);
+   // Open the file and load the contents into the page.
+   loadFile(&page, fileName);
+   updateView(&page);
 
-
-   while((key = getch())) {
+   while((ch = getch())) {
       getyx(stdscr, y, x);
 
-      //Navigation with Arrowkeys
-      //Isn't bound by page structure, might want to change to restrict movement
-      if(key == KEY_UP) {
-         chgat(1, A_NORMAL, 0, NULL);
-         mvchgat(y-1, x, 1, A_STANDOUT, 0, NULL);     
-      }
-      if(key == KEY_DOWN){
-         chgat(1, A_NORMAL, 0, NULL);
-         mvchgat(y+1, x, 1, A_STANDOUT, 0, NULL);
-      }
-      if(key == KEY_LEFT) {
-         chgat(1, A_NORMAL, 0, NULL);
-         mvchgat(y, x-1, 1, A_STANDOUT, 0, NULL);
-      }
-      if(key == KEY_RIGHT) {
-         chgat(1, A_NORMAL, 0, NULL);
-         mvchgat(y, x+1, 1, A_STANDOUT, 0, NULL);
-      }
+      // Manage mode changes
+      if (mode != 'e'
+         && ch == 'e') mode = 'e';
 
-      //Press 'w' key to save the file
-      if (key == 119) {
-         saveFile(&my_page, fileName);
-         mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
-         wmove(stdscr, y-1, x);
-      }
-      //Press 'q' key to quit application
-      if (key == 113) break;
-      //Press 'e' key to switch to editing mode
-      if (key == 101) editing(stdscr, &my_page);
-      if (key == KEY_F(3)) find_and_replace(stdscr, &my_page, findOnly);
-      // Press 'F4' key to switch find and replace
-      if (key == KEY_F(4)) find_and_replace(stdscr, &my_page, findAndReplace);
-      refresh();
+      if (mode != 'c'
+         && ch == 27) mode = 'c';
+
+      if (mode == 'e') editing(stdscr, &page);
+
+      // Arrowkey navigation restricted to within
+      // valid text area.
+      if (driver(ch, mode, x, y, &page) < 0) break;
+      else refresh();
    }
-   freePage(&my_page);
+   freePage(&page);
    endwin();
    return 0;
 }
@@ -87,4 +114,5 @@ void updateView(Page* page) {
    int rowCount = page->numRows;
    for(int i = 0; i < rowCount; i++)
       printw(strcat(page->lines[i], "\n"));
+   refresh();
 }
