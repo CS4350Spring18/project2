@@ -62,13 +62,15 @@ void editing(WINDOW* my_win, Page* page) {
     else if(key == 8 || key == 127 || key == KEY_BACKSPACE) {
       // If not at the left side of the line
       if(x != 0) {
-        //mvwprintw(my_win,y,x-1," ");
+        mvwprintw(my_win,y,x-1," ");
         backspace(page, y, x-1);
+        wmove(my_win,y,x);
+        clrtoeol();
         mvwprintw(my_win, y, 0, page->lines[y]);
         wmove(my_win,y,x-1);
       }
       // If at the left side of the string, need to append lines
-      else if(y != 0 && page->sizes[y-1] + page->sizes[y] + 1 < MAX_COLS) {
+      else if(y > 1 && page->sizes[y-1] + page->sizes[y] + 1 < MAX_COLS) {
         for(int i = 0; i < page->sizes[y]; i++) {
           page->lines[y-1][page->sizes[y-1]+i] = page->lines[y][i];
         }
@@ -90,7 +92,7 @@ void editing(WINDOW* my_win, Page* page) {
         }
 
         // clear each line and update with the new page lines
-        for(int i = 0; i < row-2; i++) {
+        for(int i = 1; i < row-2; i++) {
           wmove(my_win, i, 0);
           clrtoeol();
           mvwprintw(my_win, i, 0, page->lines[i]);
@@ -99,6 +101,10 @@ void editing(WINDOW* my_win, Page* page) {
         // move the cursor to the beginning of the second line
         mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y-1, page->sizes[y-1]);
         wmove(my_win,y-1,old_x);
+      }
+      else if(y == 1) {
+        //mvwprintw(my_win,row-1,0,"Error: row would be too long if append happens.");
+        //wmove(my_win,y,x);  
       }
       // appending the line and the one below would exceed MAX_COLS
       else {
@@ -154,7 +160,7 @@ void editing(WINDOW* my_win, Page* page) {
         mvwprintw(my_win, y+1, 0, page->lines[y+1]);
 
       // clear each line and update with the new page lines
-      for(int i = 0/*y-2*/; i < row-2; i++) {
+      for(int i = 1/*y-2*/; i < row-2; i++) {
         wmove(my_win, i, 0);
         clrtoeol();
         mvwprintw(my_win, i, 0, page->lines[i]);
