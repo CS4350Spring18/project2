@@ -74,6 +74,9 @@ int main(int argc, char* argv[]) {
       //Press 'e' key to switch to editing mode
       if (key == 101) editing(stdscr, &my_page);
       refresh();
+      //Press 'v' key to switch to visual mode
+      if (key == 118) visual(stdscr, &my_page);
+      refresh();
    }
    freePage(&my_page);
    endwin();

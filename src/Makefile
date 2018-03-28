@@ -21,6 +21,9 @@ page.o: page.c
 editing.o: editing.c
 	gcc -g -c -std=c99 -Wall $<
 
+visual.o: copy.c
+	gcc -g -c std=c99 -Wall $<
+
 .PHONY: clean
 clean:
 	rm -f $(project) *.out *.o *.log *.txt
