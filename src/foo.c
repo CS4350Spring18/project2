@@ -14,13 +14,16 @@ static char* fileName;
 
 void updateView(Page* page);
 
-static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
+static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChanged) {
    mvwprintw(stdscr,0,0,"Group #3, editing file %s", fileName);
    if(mode == 'e') {
      mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos);
      mvwchgat(stdscr,yPos,xPos, 1, A_NORMAL, 0, NULL);
      if(xPos > page->sizes[yPos]) wmove(stdscr,yPos, page->sizes[yPos]);
      wrefresh(stdscr);
+     if(justChanged) {
+       return;
+     }
    }
    if(mode == 'c') {
      wmove(stdscr, row-2,0);
@@ -83,13 +86,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
              wmove(stdscr,yPos, xPos);
          }
          break;
-      case 'w':
-         if (mode == 'c') {
-            saveFile(page, fileName);
-            mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
-            wmove(stdscr, yPos, xPos);
-            break;
-         }
+
       case 'q':
          if (mode == 'c') return -1;
 
@@ -162,7 +159,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
          break;
 
       case 10:
-         if(y < row-3) {
+         if(yPos < row-3) {
             // move each line down one for the page
             for(int i = row-3; i > yPos+1; i--) {
               int size = 0;
@@ -208,6 +205,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
             mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos+1, 0);
             wmove(stdscr,yPos+1,0);
          }
+         break;
 
       // Press 'F4' key to switch find and replace
       case KEY_F(4):
@@ -218,6 +216,12 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page) {
       case '?': break;
       default: 
          if( ch >= 32 && ch <= 126 && xPos+1 < MAX_COLS) {
+            if (mode == 'c') {
+               saveFile(page, fileName);
+               mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
+               wmove(stdscr, yPos, xPos);
+               break;
+            }
             insertChar(page, yPos, xPos, ch);
             mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
             mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos+1);
@@ -241,7 +245,7 @@ int main(int argc, char* argv[]) {
    // Else run the editor
    int ch,
        mode = 'c';
-   int y, x;
+   int y, x, justChanged = 0;
    fileName = argv[1];
 
    initscr();
@@ -266,7 +270,7 @@ int main(int argc, char* argv[]) {
 
       // Manage mode changes
       if (mode != 'e'
-         && ch == 'e') mode = 'e';
+         && ch == 'e') { mode = 'e'; justChanged = 1; }
 
       if (mode != 'c'
          && ch == 27) mode = 'c';
@@ -275,8 +279,9 @@ int main(int argc, char* argv[]) {
 
       // Arrowkey navigation restricted to within
       // valid text area.
-      if (driver(ch, mode, x, y, &page) < 0) break;
+      if (driver(ch, mode, x, y, &page, justChanged) < 0) break;
       else refresh();
+      justChanged = 0;
    }
    freePage(&page);
    endwin();
