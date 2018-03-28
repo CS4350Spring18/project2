@@ -92,7 +92,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
 
       case KEY_F(3):
          if (mode == 'c') {
-           find_and_replace(stdscr, &page, findOnly);
+           find_and_replace(stdscr, page, findOnly);
            break;
          }
 
@@ -210,7 +210,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
       // Press 'F4' key to switch find and replace
       case KEY_F(4):
          if (mode == 'c') {
-           find_and_replace(stdscr, &page, findAndReplace);
+           find_and_replace(stdscr, page, findAndReplace);
            break;
          }
       case '?': break;
