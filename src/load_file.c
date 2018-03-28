@@ -2,7 +2,7 @@
 
 
 void loadFile(Page* page, char fileName[]) {
-   int row = 0,
+   int row = 1,
        col = 200;
    char buffer[col];
    FILE* file = fopen(fileName, "r");
@@ -10,7 +10,7 @@ void loadFile(Page* page, char fileName[]) {
    if (file != NULL) {
       while(fgets(buffer, col, file))
          setRow(page, row++, buffer);
-      page->numRows = row;
+      page->numRows = row-1;
       fclose(file);
    // If there is no valid file object,
    // create an empty line to use.
