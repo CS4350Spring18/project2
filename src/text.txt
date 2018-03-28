@@ -1,10 +1,8 @@
 hello world
 hi there
 
-hey man
-good stuff
 
+nice job
+   hey man okay
 
-yes
-
-cool
+yay

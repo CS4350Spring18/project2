@@ -158,6 +158,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
          }
          break;
 
+      // ENTER KEY FUNCTIONALITY
       case 10:
          if(yPos < row-3) {
             // move each line down one for the page
@@ -172,7 +173,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
               page->sizes[i] = page->sizes[i-1];
             }
 
-            for(int i = xPos; i <= page->sizes[yPos]; i++){
+            for(int i = xPos; i <= page->sizes[yPos+1]; i++){
               page->lines[yPos+1][i-xPos] = page->lines[yPos][i];
               page->lines[yPos][i] = '\0';
             }
