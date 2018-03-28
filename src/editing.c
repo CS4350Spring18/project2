@@ -112,18 +112,7 @@ void editing(WINDOW* my_win, Page* page) {
         wmove(my_win,y,x);
       }
     }
-    //ALT_BACKSPACE
-    /*else if(key == 127 && x != 0) {
-      //Don't delete if at the left of screen
-      backspace(page, y, x-1);
-      //Need to overwrite the last character on the line, 
-      //  otherwise it will remain on screen
-      mvwprintw(my_win, y, page->sizes[y], " ");  
-      mvwprintw(my_win, y, 0, page->lines[y]);
-      wmove(my_win,y,x-1);
-    }*/
-
-    //TODO: Add Return key functionality (Task II.5)
+    // Return key functionality 
     else if(key == 10 && y < row-3) {
       // move each line down one for the page
       for(int i = row-3; i > y+1; i--) {
@@ -166,8 +155,8 @@ void editing(WINDOW* my_win, Page* page) {
         mvwprintw(my_win, i, 0, page->lines[i]);
       }
       page->numRows++;
-      // move the cursor to the beginning of the second line
       mvwprintw(my_win,row-2,0,"----Editing---- %d, %d  ", y+1, 0);
+      // move the cursor to the beginning of the second line
       wmove(my_win,y+1,0);
     }
 
