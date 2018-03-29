@@ -142,6 +142,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst
          if(mode == 'v' && strlen(copyString) != 0) {
             paste(stdscr, page, copyString);
          }
+         break;
 
       // Delete a character
       case KEY_BACKSPACE:

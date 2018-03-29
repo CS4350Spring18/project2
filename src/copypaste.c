@@ -7,15 +7,15 @@ void copy(Page* page, int y, int x1, int x2, char *mainString){
    getyx(stdscr, y1, x);
    if(x1 < x2) {
       for(int i = x1; i < x2; i++) {
-        copyString[i] = page->lines[y][i]; 
+        copyString[i-x1] = page->lines[y][i]; 
       }
-      copyString[x1-x2] = '\0';
+      copyString[x2] = '\0';
    }
    else {
       for(int i = x2; i < x1; i++) {
-        copyString[i] = page->lines[y][i]; 
+        copyString[i-x2] = page->lines[y][i]; 
       }
-      copyString[x2-x1] = '\0';
+      copyString[x1] = '\0';
    }
    strcpy(mainString, copyString);
 }
@@ -43,15 +43,19 @@ void paste(WINDOW* stdscr, Page* page, char *copyString){
    }
    else {
       // move the current contents over 
-      for(int i = x + length + 1; i > page->sizes[y] - x -1; i--) {
-         page->lines[y][i] = page->lines[y][i - length -1];
+      /*for(int i = x + length + 1; i > page->sizes[y] - x -1; i++) {
+         page->lines[y][i] = page->lines[y][i  length -1];
+      }*/
+      for(int i = length-1; i >= 0; i--) {
+        insertChar(page, y, x, copyString[i]);
       }
+      //memmove(page->lines[y] + x + length, page->lines[y] + length, MAX_COLS - (x + length));
       page->sizes[y] = page->sizes[y] + length;
 
       // put in the copyString
-      for(int i = x; i < x + length; i++) {
-         page->lines[y][i+1] = copyString[i-x];
-      }
+      /*for(int i = x; i < x + length; i++) {
+         page->lines[y][i] = copyString[i-x];
+      }*/
    }
 
    for(int i = 1; i < row-2; i++) {
@@ -60,7 +64,7 @@ void paste(WINDOW* stdscr, Page* page, char *copyString){
       mvwprintw(stdscr, i, 0, page->lines[i]);
    }
    // move the cursor to the end of the line
-   wmove(stdscr, y, x+length+1);
+   wmove(stdscr, y, x);
 
    refresh();
 
