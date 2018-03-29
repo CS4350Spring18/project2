@@ -13,11 +13,14 @@
 static int row;
 static int col;
 static char* fileName;
+static char savedString[5];
+memset(copyString, 0, 5);
 
 void updateView(Page* page);
 
 static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChanged, int *dFirst) {
    mvwprintw(stdscr,0,0,"Group #3, editing file %s", fileName);
+//   savedString[0] = malloc(60);
    if(mode == 'e') {
      mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos);
      mvwchgat(stdscr,yPos,xPos, 1, A_NORMAL, 0, NULL);
@@ -34,6 +37,12 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
      if(xPos > page->sizes[yPos]) wmove(stdscr,yPos, page->sizes[yPos]);
      wrefresh(stdscr);
    }
+   if(mode == 'v') {
+      int count = 0;
+      mvwprintw(stdscr, row-2,0,"----Visual----- %d, %d  ", yPos, xPos);
+      if(xPos > page->sizes[yPos]) wmove(stdscr,yPos, page->sizes[yPos]);
+      wrefresh(stdscr);
+   }
    wmove(stdscr, row-1, 0);
    clrtoeol();
    wmove(stdscr, yPos, xPos);
@@ -47,13 +56,16 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
            if(mode == 'e') {
              mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos-1, xPos);
            }
+           if(mode == 'v'){
+           //  savedString[count++] = copy(page, yPos, xPos));
+             printVisual(stdscr, page, yPos, xPos);
+             highlightText();
+           }
            wmove(stdscr,yPos-1, xPos);
          }
          break;
 
       case KEY_DOWN:
-         //chgat(1, A_NORMAL, 0, NULL);
-         //mvchgat(yPos + 1, xPos, 1, A_STANDOUT, 0, NULL);
          if(xPos > page->sizes[yPos+1])
            xPos = page->sizes[yPos+1];
          if( yPos >= page->numRows)
@@ -61,28 +73,46 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
          if(mode == 'e') {
            mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos+1, xPos);
          }
+         if(mode == 'v'){
+            //*savedString = copy(page, yPos, xPos);
+            printVisual(stdscr, page, yPos, xPos);
+            highlightText();
+         }
          wmove(stdscr,yPos+1, xPos);
          break;
 
       case KEY_LEFT:
-         //chgat(1, A_NORMAL, 0, NULL);
-         //mvchgat(yPos, xPos - 1, 1, A_STANDOUT, 0, NULL);
          if(xPos != 0) {
            if(mode == 'e') {
              mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos-1);
+           }
+           if(mode == 'v'){
+             char* tempString;
+             copy(page, yPos, xPos, &savedString, &count);
+             //*savedString  = page->lines[yPos];
+//             memcpy(savedString, copy(page, yPos, xPos), count++);
+             printVisual(stdscr, page, yPos, xPos);
+             highlightText();
            }
            wmove(stdscr,yPos, xPos-1);
          }
          break;
 
-      case KEY_RIGHT:
+         case KEY_RIGHT:
          //chgat(1, A_NORMAL, 0, NULL);
          //mvchgat(yPos, xPos + 1, 1, A_STANDOUT, 0, NULL);
          if(xPos+1 < MAX_COLS) {
            if(xPos < page->sizes[yPos]) {
-             if(mode == 'e')
+             if(mode == 'e'){
                mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos+1);
-             wmove(stdscr,yPos, xPos+1);
+             }
+             if(mode == 'v'){
+               //*savedString[count++] = copy(stdscr, yPos, xPos);
+ //              memcpy(savedString, copy(page, yPos, xPos), count++);
+               printVisual(stdscr, page, yPos, xPos);
+               highlightText();
+             } 
+            wmove(stdscr,yPos, xPos+1);
            }
            else
              wmove(stdscr,yPos, xPos);
@@ -91,7 +121,11 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
 
       case 'q':
          if (mode == 'c') return -1;
-
+      
+      case 'p':
+         if (mode == 'c')
+            paste(stdscr, page, yPos, xPos, *savedString[0], count);
+      break;
       case KEY_F(3):
          if (mode == 'c') {
            find_and_replace(stdscr, page, findOnly);
@@ -165,7 +199,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
                 *dFirst = 0;
               }
             }
-            else {
+            else if(ch == 'e'){
               insertChar(page, yPos, xPos, ch);
               mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
               mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos+1);
@@ -216,6 +250,10 @@ int main(int argc, char* argv[]) {
       // Manage mode changes
       if (mode != 'e'
          && ch == 'e') { mode = 'e'; justChanged = 1; }
+   
+      if(mode == 'c'
+         && ch == 'v') mode = 'v';
+
 
       if (mode != 'c'
          && ch == 27) mode = 'c';
