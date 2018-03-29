@@ -40,6 +40,9 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst
          if(yPos > 1) {
             // Enforce upper boundary for the cursor
             if(xPos > page->sizes[yPos - 1]) xPos = page->sizes[yPos - 1];
+            if(mode == 'e') {
+               mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos-1, xPos);
+            }
             wmove(stdscr, yPos - 1, xPos);
          }
          break;
@@ -49,18 +52,31 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst
          // the page -> update the cursor to the end of the file.
          if(xPos > page->sizes[yPos + 1]) xPos = page->sizes[yPos + 1];
          if(yPos >= page->numRows) yPos = page->numRows;
+         if(mode == 'e') {
+            mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos+1, xPos);
+         }
          wmove(stdscr, yPos + 1, xPos);
          break;
 
       case KEY_LEFT:
          // Enforce the left boundary for the cursor
-         if(xPos != 0) wmove(stdscr, yPos, xPos - 1);
+         if(xPos != 0) {
+            if(mode == 'e') {
+               mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos, xPos-1);
+            }
+            wmove(stdscr, yPos, xPos - 1);
+         }
          break;
 
       case KEY_RIGHT:
          // Enforce the right boundary for the cursor
          if(xPos + 1 < MAX_COLS) {
-            if (xPos < page->sizes[yPos]) wmove(stdscr, yPos, xPos + 1);
+            if (xPos < page->sizes[yPos]) {
+               if(mode == 'e') {
+                  mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos, xPos);
+               }
+               wmove(stdscr, yPos, xPos + 1);
+            }
             else wmove(stdscr, yPos, xPos);
          }
          break;
