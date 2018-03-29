@@ -107,34 +107,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
       case 8:
       case 127:
       case KEY_BACKSPACE:
-         // If not at the left side of the line
-         if(xPos != 0) {
-           mvwprintw(stdscr,yPos,xPos-1," ");
-           backspace(page, yPos, xPos-1, MAX_COLS);
-           wmove(stdscr,yPos,xPos);
-           clrtoeol();
-           mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
-           mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos-1);
-           wmove(stdscr,yPos,xPos-1);
-         }
-         // If at the left side of the string, need to append lines
-         else if(yPos > 1 && page->sizes[yPos-1] + page->sizes[yPos] + 1 < MAX_COLS) {
-           backspace(page, yPos, xPos-1, MAX_COLS);
-           // clear each line and update with the new page lines
-           for(int i = 1; i < row-2; i++) {
-             wmove(stdscr, i, 0);
-             clrtoeol();
-             mvwprintw(stdscr, i, 0, page->lines[i]);
-           }
-           // move the cursor to the beginning of the second line
-           mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos-1, page->sizes[yPos-1]);
-           wmove(stdscr,yPos-1,old_xPos);
-         }
-         // appending the line and the one below would exPosceed MAX_COLS
-         else {
-           mvwprintw(stdscr,row-1,0,"Error: row would be too long if append happens.");
-           wmove(stdscr,yPos,xPos);
-         }
+         backspace(stdscr, row, page, yPos, xPos, MAX_COLS);
          break;
 
       // ENTER KEY FUNCTIONALITY
