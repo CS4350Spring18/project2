@@ -16,7 +16,7 @@ void deleteLine(Page* page, int row, int xPos, int yPos) {
 
     // clear the line completely
     for(int i = 0; i < page->sizes[yPos]; i++){
-      page->lines[yPos][i] = '\0'
+      page->lines[yPos][i] = '\0';
     }
 
     // move each line up one for the page
@@ -25,8 +25,8 @@ void deleteLine(Page* page, int row, int xPos, int yPos) {
       page->sizes[i] = page->sizes[i+1];
     }
 
-    page->lines[row-1] = '\0';
-    page->sizes[row-1] = 0;
+    //page->lines[row-1] = '\0';
+    //page->sizes[row-1] = 0;
 
 
     page->numRows--;

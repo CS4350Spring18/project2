@@ -193,10 +193,22 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
               }
               if(ch == 'd' && !*dFirst) {
                 *dFirst = 1;
-                return;
+                return 0;
               }
-              if(ch == 'd' && *dFirst) {
-                deleteLine(page, row, xPos, yPos)
+              if(ch == 'd' && *dFirst && page->numRows > 0) {
+                deleteLine(page, row, xPos, yPos);
+                // clear each line and update with the new page lines
+                for(int i = 1; i < row-2; i++) {
+                  wmove(stdscr, i, 0);
+                  clrtoeol();
+                  mvwprintw(stdscr, i, 0, page->lines[i]);
+                }
+                mvwprintw(stdscr, yPos, xPos, "%d", page->numRows);
+                if(yPos < page->numRows+2)
+                  wmove(stdscr, yPos, xPos);
+                else
+                  wmove(stdscr, yPos-1, xPos);
+                *dFirst = 0;
               }
             }
             else {
@@ -207,7 +219,6 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
             }
          }
          break;
-      *dFirst = 0;
    }
    //wrefresh(stdscr);
    return 0;
@@ -259,7 +270,7 @@ int main(int argc, char* argv[]) {
 
       // Arrowkey navigation restricted to within
       // valid text area.
-      if (driver(ch, mode, x, y, &page, justChanged) < 0) break;
+      if (driver(ch, mode, x, y, &page, justChanged, &dFirst) < 0) break;
       else refresh();
       justChanged = 0;
    }

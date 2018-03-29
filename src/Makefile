@@ -1,5 +1,5 @@
 project=foo
-objects=foo.o save_file.o load_file.o editing.o page_ops.o find.o newline.o
+objects=foo.o save_file.o load_file.o editing.o page_ops.o find.o newline.o deleteline.o
 links=-lncurses
 cc=gcc
 cflags=-Wall -std=c99 -g -pedantic
