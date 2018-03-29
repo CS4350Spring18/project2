@@ -8,6 +8,7 @@
 #include "page_ops.h"
 #include "find.h"
 #include "newline.h"
+#include "deleteline.h"
 
 static int row;
 static int col;
@@ -15,7 +16,7 @@ static char* fileName;
 
 void updateView(Page* page);
 
-static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChanged) {
+static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChanged, int *dFirst) {
    mvwprintw(stdscr,0,0,"Group #3, editing file %s", fileName);
    if(mode == 'e') {
      mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos);
@@ -190,6 +191,13 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
               if(ch == 'q') {
                 return -1;
               }
+              if(ch == 'd' && !*dFirst) {
+                *dFirst = 1;
+                return;
+              }
+              if(ch == 'd' && *dFirst) {
+                deleteLine(page, row, xPos, yPos)
+              }
             }
             else {
               insertChar(page, yPos, xPos, ch);
@@ -199,6 +207,7 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
             }
          }
          break;
+      *dFirst = 0;
    }
    //wrefresh(stdscr);
    return 0;
@@ -216,7 +225,7 @@ int main(int argc, char* argv[]) {
    // Else run the editor
    int ch,
        mode = 'c';
-   int y, x, justChanged = 0;
+   int y, x, justChanged = 0, dFirst = 0;
    fileName = argv[1];
 
    initscr();

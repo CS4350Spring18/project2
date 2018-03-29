@@ -1,7 +1,7 @@
 #include "newline.h"
 
 void newLine(Page* page, int row, int xPos, int yPos) {
-  if(yPos < row-3) {
+  if(yPos < row-3 && page->numRows+1 < row-3) {
     // move each line down one for the page
     for(int i = row-3; i > yPos+1; i--) {
       int size = 0;

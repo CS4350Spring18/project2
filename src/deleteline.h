@@ -6,10 +6,9 @@
 
 #include "page_struct.h"
 
-
 //***********************************************/
-// newLine:
-//   inserts a new line to the page
+// deleteLine:
+//   deletes a line from the page
 //
 // Parameters:
 //   page: Refernce to Page object to initiate
@@ -18,4 +17,4 @@
 //   y: column # of the position of the character
 //
 //***********************************************/
-void newLine(Page* page, int row, int x, int y);
+void deleteLine(Page* page, int row, int x, int y);

@@ -6,8 +6,6 @@
 
 #include "page_struct.h"
 
-void editing(WINDOW* my_win, Page* page);
-
 //***********************************************/
 // insertRow:
 //   Inserts a character to position on the page
