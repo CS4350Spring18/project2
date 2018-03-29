@@ -1,9 +1,4 @@
-hello world
-hi there
+hello 
+yah 
 
-
-
-nice job
-   hey man okay
-
-yay
+man

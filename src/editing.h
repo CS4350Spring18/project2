@@ -6,8 +6,6 @@
 
 #include "page_struct.h"
 
-void editing(WINDOW* my_win, Page* page);
-
 //***********************************************/
 // insertRow:
 //   Inserts a character to position on the page
@@ -38,9 +36,12 @@ void setRow(Page* page, int row, char line[]);
 //   Removes a charcter from a position on the page
 //
 // Parameters:
+//   my_win: the display window
+//   row: max rows
 //   page: Refernce to Page object to initiate
-//   row: row # of the position of the character
+//   yPos: row # of the position of the character
 //   col: column # of the position of the character
+//   MAX_COLS: maximum number of columns
 //
 //***********************************************/
-void backspace(Page* page, int row, int col);
+void backspace(WINDOW* my_win, int row, Page* page, int yPos, int xPos, int MAX_COLS);

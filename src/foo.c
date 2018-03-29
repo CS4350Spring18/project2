@@ -7,6 +7,8 @@
 #include "page_struct.h"
 #include "page_ops.h"
 #include "find.h"
+#include "newline.h"
+#include "deleteline.h"
 
 static int row;
 static int col;
@@ -14,7 +16,7 @@ static char* fileName;
 
 void updateView(Page* page);
 
-static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChanged) {
+static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChanged, int *dFirst) {
    mvwprintw(stdscr,0,0,"Group #3, editing file %s", fileName);
    if(mode == 'e') {
      mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos);
@@ -105,108 +107,25 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
       case 8:
       case 127:
       case KEY_BACKSPACE:
-         // If not at the left side of the line
-         if(xPos != 0) {
-           mvwprintw(stdscr,yPos,xPos-1," ");
-           backspace(page, yPos, xPos-1);
-           wmove(stdscr,yPos,xPos);
-           clrtoeol();
-           mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
-           wmove(stdscr,yPos,xPos-1);
-         }
-         // If at the left side of the string, need to append lines
-         else if(yPos > 1 && page->sizes[yPos-1] + page->sizes[yPos] + 1 < MAX_COLS) {
-           for(int i = 0; i < page->sizes[yPos]; i++) {
-             page->lines[yPos-1][page->sizes[yPos-1]+i] = page->lines[yPos][i];
-           }
-           int old_xPos = page->sizes[yPos-1];
-           page->sizes[yPos-1] = page->sizes[yPos-1] + page->sizes[yPos];
-           mvwprintw(stdscr, yPos-1, 0, page->lines[yPos-1]);
-           mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
-           
-           // move each line up one for the page
-           for(int i = yPos; i < row-3; i++) {
-             int size = 0;
-             if(page->sizes[i] > page->sizes[i+1])
-                 size = page->sizes[i];
-             else
-                 size = page->sizes[i+1];
-             for(int j = 0; j <= size; j++)
-                 page->lines[i][j] = page->lines[i+1][j];
-             page->sizes[i] = page->sizes[i+1];
-           }
-
-           // clear each line and update with the new page lines
-           for(int i = 1; i < row-2; i++) {
-             wmove(stdscr, i, 0);
-             clrtoeol();
-             mvwprintw(stdscr, i, 0, page->lines[i]);
-           }
-           page->numRows--;
-           // move the cursor to the beginning of the second line
-           mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos-1, page->sizes[yPos-1]);
-           wmove(stdscr,yPos-1,old_xPos);
-         }
-         else if(yPos == 1) {
-           //mvwprintw(stdscr,row-1,0,"Error: row would be too long if append happens.");
-           //wmove(stdscr,yPos,xPos);  
-         }
-         // appending the line and the one below would exPosceed MAX_COLS
-         else {
-           mvwprintw(stdscr,row-1,0,"Error: row would be too long if append happens.");
-           wmove(stdscr,yPos,xPos);
-         }
+         backspace(stdscr, row, page, yPos, xPos, MAX_COLS);
          break;
 
       // ENTER KEY FUNCTIONALITY
       case 10:
-         if(yPos < row-3) {
-            // move each line down one for the page
-            for(int i = row-3; i > yPos+1; i--) {
-              int size = 0;
-              if(page->sizes[i] > page->sizes[i-1])
-                  size = page->sizes[i];
-              else
-                  size = page->sizes[i-1];
-              for(int j = 0; j <= size; j++)
-                  page->lines[i][j] = page->lines[i-1][j];
-              page->sizes[i] = page->sizes[i-1];
-            }
+          // clear each line and update with the new page lines
+          if(yPos < row-3) {
+            newLine(page, row, xPos, yPos);
 
-            for(int i = xPos; i <= page->sizes[yPos+1]; i++){
-              page->lines[yPos+1][i-xPos] = page->lines[yPos][i];
-              page->lines[yPos][i] = '\0';
-            }
-
-            page->sizes[yPos+1] = page->sizes[yPos] -  xPos;
-            page->sizes[yPos] = xPos;
-
-            // clear the first line
-            wmove(stdscr, yPos, 0);
-            clrtoeol();
-            // clear the second line
-            wmove(stdscr, yPos+1, 0);
-            clrtoeol();
-            
-            // update the first line
-            if(page->sizes[yPos] != 0)
-              mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
-            // update the second line
-            if(page->sizes[yPos+1] != 0)
-              mvwprintw(stdscr, yPos+1, 0, page->lines[yPos+1]);
-
-            // clear each line and update with the new page lines
-            for(int i = 1/*yPos-2*/; i < row-2; i++) {
+            for(int i = 1; i < row-2; i++) {
               wmove(stdscr, i, 0);
               clrtoeol();
               mvwprintw(stdscr, i, 0, page->lines[i]);
             }
-            page->numRows++;
             // move the cursor to the beginning of the second line
             mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos+1, 0);
             wmove(stdscr,yPos+1,0);
-         }
-         break;
+          }
+          break;
 
       // Press 'F4' key to switch find and replace
       case KEY_F(4):
@@ -217,16 +136,41 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
       case '?': break;
       default: 
          if( ch >= 32 && ch <= 126 && xPos+1 < MAX_COLS) {
-            if (mode == 'c') {
-               saveFile(page, fileName);
-               mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
-               wmove(stdscr, yPos, xPos);
-               break;
+            if(mode == 'c') {
+              if(ch ==  'w') {
+                saveFile(page, fileName);
+                mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
+                wmove(stdscr, yPos, xPos);
+              }
+              if(ch == 'q') {
+                return -1;
+              }
+              if(ch == 'd' && !*dFirst) {
+                *dFirst = 1;
+                return 0;
+              }
+              if(ch == 'd' && *dFirst && page->numRows > 0) {
+                deleteLine(page, row, xPos, yPos);
+                // clear each line and update with the new page lines
+                for(int i = 1; i < row-2; i++) {
+                  wmove(stdscr, i, 0);
+                  clrtoeol();
+                  mvwprintw(stdscr, i, 0, page->lines[i]);
+                }
+                mvwprintw(stdscr, yPos, xPos, "%d", page->numRows);
+                if(yPos < page->numRows+2)
+                  wmove(stdscr, yPos, xPos);
+                else
+                  wmove(stdscr, yPos-1, xPos);
+                *dFirst = 0;
+              }
             }
-            insertChar(page, yPos, xPos, ch);
-            mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
-            mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos+1);
-            wmove(stdscr,yPos,xPos+1);
+            else {
+              insertChar(page, yPos, xPos, ch);
+              mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
+              mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos+1);
+              wmove(stdscr,yPos,xPos+1);
+            }
          }
          break;
    }
@@ -246,7 +190,7 @@ int main(int argc, char* argv[]) {
    // Else run the editor
    int ch,
        mode = 'c';
-   int y, x, justChanged = 0;
+   int y, x, justChanged = 0, dFirst = 0;
    fileName = argv[1];
 
    initscr();
@@ -280,7 +224,7 @@ int main(int argc, char* argv[]) {
 
       // Arrowkey navigation restricted to within
       // valid text area.
-      if (driver(ch, mode, x, y, &page, justChanged) < 0) break;
+      if (driver(ch, mode, x, y, &page, justChanged, &dFirst) < 0) break;
       else refresh();
       justChanged = 0;
    }
