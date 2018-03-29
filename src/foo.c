@@ -14,8 +14,8 @@
 static int row;
 static int col;
 static char* fileName;
-static char* copyString[50];
-static int old_x, new_x;
+static char copyString[50];
+static int old_x;
 
 void initView(Page* page);
 
@@ -137,6 +137,12 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst
             break;
          }
 
+      // Paste
+      case 'p':
+         if(mode == 'v' && strlen(copyString) != 0) {
+            paste(stdscr, page, copyString);
+         }
+
       // Delete a character
       case KEY_BACKSPACE:
          backspace(stdscr, row, page, yPos, xPos, MAX_COLS);
@@ -160,8 +166,9 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst
             }
           }
           if(mode == 'v') {
-            copyString = copy(page, yPos, old_x, xPos);
+            copy(page, yPos, old_x, xPos, copyString);
             mvwprintw(stdscr, row - 2, 0, "Copied string '%s'.", copyString);
+            wmove(stdscr, yPos, xPos);
           }
           break;
 
@@ -186,7 +193,6 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst
    // Continue to next input
    return 0;
 }
-
 
 int main(int argc, char* argv[]) {
 
@@ -228,7 +234,7 @@ int main(int argc, char* argv[]) {
 
    // Header line
    mvwprintw(stdscr, 0, 0, "Group #3, editing file %s", fileName);
-   wmove(stdscr, 0, x);
+   wmove(stdscr, 1, x);
 
    // Continue to get an input until q is provided in command mode.
    while((ch = getch())) {
