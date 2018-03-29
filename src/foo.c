@@ -9,175 +9,191 @@
 #include "find.h"
 #include "newline.h"
 #include "deleteline.h"
+#include "copypaste.h"
 
 static int row;
 static int col;
 static char* fileName;
+static char copyString[50];
+static int old_x;
 
-void updateView(Page* page);
+void initView(Page* page);
 
-static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChanged, int *dFirst) {
-   mvwprintw(stdscr,0,0,"Group #3, editing file %s", fileName);
-   if(mode == 'e') {
-     mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos);
-     mvwchgat(stdscr,yPos,xPos, 1, A_NORMAL, 0, NULL);
-     if(xPos > page->sizes[yPos]) wmove(stdscr,yPos, page->sizes[yPos]);
-     wrefresh(stdscr);
-     if(justChanged) {
-       return;
-     }
-   }
-   if(mode == 'c') {
-     wmove(stdscr, row-2,0);
-     clrtoeol();
-     mvwchgat(stdscr,yPos,xPos, 1, A_NORMAL, 0, NULL);
-     if(xPos > page->sizes[yPos]) wmove(stdscr,yPos, page->sizes[yPos]);
-     wrefresh(stdscr);
-   }
-   wmove(stdscr, row-1, 0);
+static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst) {
+   // Make sure the header remains visible.
+   mvwprintw(stdscr, 0, 0, "Group #3, editing file %s", fileName);
+
+   wmove(stdscr, row - 1, 0);
    clrtoeol();
    wmove(stdscr, yPos, xPos);
+
+   // If we're in editing mode we want to capture the characters
+   if(ch >= 32 && ch <= 126) {
+      if (mode == 'e' && xPos + 1 < MAX_COLS) {
+         insertChar(page, yPos, xPos, ch);
+         mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
+         wmove(stdscr, yPos, xPos + 1);
+         return 0;
+      }
+   }
+
+   // Otherwise check for special character behavior
    switch(ch) {
       case KEY_UP:
          if(yPos > 1) {
-           //chgat(1, A_NORMAL, 0, NULL);
-           //mvchgat(yPos-1, xPos, 1, A_STANDOUT, 0, NULL);
-           if(xPos > page->sizes[yPos-1])
-             xPos = page->sizes[yPos-1];
-           if(mode == 'e') {
-             mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos-1, xPos);
-           }
-           wmove(stdscr,yPos-1, xPos);
+            // Enforce upper boundary for the cursor
+            if(xPos > page->sizes[yPos - 1]) xPos = page->sizes[yPos - 1];
+            if(mode == 'e') {
+               mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos-1, xPos);
+            }
+            if(mode == 'v') {
+               break;
+            }
+            wmove(stdscr, yPos - 1, xPos);
          }
          break;
 
       case KEY_DOWN:
-         //chgat(1, A_NORMAL, 0, NULL);
-         //mvchgat(yPos + 1, xPos, 1, A_STANDOUT, 0, NULL);
-         if(xPos > page->sizes[yPos+1])
-           xPos = page->sizes[yPos+1];
-         if( yPos >= page->numRows)
-           yPos = page->numRows;
+         // Enforce the lower boundary. If we try to go off the end of
+         // the page -> update the cursor to the end of the file.
+         if(xPos > page->sizes[yPos + 1]) xPos = page->sizes[yPos + 1];
+         if(yPos >= page->numRows) yPos = page->numRows;
          if(mode == 'e') {
-           mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos+1, xPos);
+            mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos+1, xPos);
          }
-         wmove(stdscr,yPos+1, xPos);
+         if(mode == 'v') {
+            break;
+         }
+         wmove(stdscr, yPos + 1, xPos);
          break;
 
       case KEY_LEFT:
-         //chgat(1, A_NORMAL, 0, NULL);
-         //mvchgat(yPos, xPos - 1, 1, A_STANDOUT, 0, NULL);
+         // Enforce the left boundary for the cursor
          if(xPos != 0) {
-           if(mode == 'e') {
-             mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos-1);
-           }
-           wmove(stdscr,yPos, xPos-1);
+            if(mode == 'e') {
+               mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos, xPos-1);
+            }
+            if(mode == 'v') {
+               mvwprintw(stdscr, row - 2, 0, "----Visual---- %d, %d  ", yPos, xPos-1);
+            }
+            wmove(stdscr, yPos, xPos - 1);
          }
          break;
 
       case KEY_RIGHT:
-         //chgat(1, A_NORMAL, 0, NULL);
-         //mvchgat(yPos, xPos + 1, 1, A_STANDOUT, 0, NULL);
-         if(xPos+1 < MAX_COLS) {
-           if(xPos < page->sizes[yPos]) {
-             if(mode == 'e')
-               mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos+1);
-             wmove(stdscr,yPos, xPos+1);
-           }
-           else
-             wmove(stdscr,yPos, xPos);
+         // Enforce the right boundary for the cursor
+         if(xPos + 1 < MAX_COLS) {
+            if (xPos < page->sizes[yPos]) {
+               if(mode == 'e') {
+                  mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos, xPos+1);
+               }
+               if(mode == 'v') {
+                  mvwprintw(stdscr, row - 2, 0, "----Visual---- %d, %d  ", yPos, xPos+1);
+               }
+               wmove(stdscr, yPos, xPos + 1);
+            }
+            else wmove(stdscr, yPos, xPos);
          }
          break;
 
+      // Delete a line
+      case 'd':
+         if(mode == 'c' && *dFirst && page->numRows > 0) {
+            *dFirst = false; // Reset delete flag
+            // Delete currently selected line
+            if (deleteLine(page, row, xPos, yPos)) {
+               // clear each line and update with the new page lines
+               for(int i = 1; i < row-2; i++) {
+                  wmove(stdscr, i, 0);
+                  clrtoeol();
+                  mvwprintw(stdscr, i, 0, page->lines[i]);
+               }
+               if(yPos < page->numRows+2) wmove(stdscr, yPos, xPos);
+               else wmove(stdscr, yPos-1, xPos);
+            } else
+               mvwprintw(stdscr, row - 1, 0, "Failed to delete position %d, %d  ", yPos, xPos);
+            break;
+         }
+
+         if (mode == 'c') {
+            *dFirst = true; // Set delete flag
+            break;
+         }
+
+      // Quit
       case 'q':
+         // Only quit if we're in command mode,
+         // otherwise q is just a normal char.
          if (mode == 'c') return -1;
 
-      case KEY_F(3):
+      // Save
+      case 'w':
+         // Only save if we're in command mode,
+         // otherwise w is just a normal char.
          if (mode == 'c') {
-           find_and_replace(stdscr, page, findOnly);
-           break;
+            saveFile(page, fileName);
+            mvwprintw(stdscr, row - 2, 0, "Saved file %s!", fileName);
+            wmove(stdscr, yPos, xPos);
+            break;
          }
 
-      case 27:
-         wmove(stdscr, row-2, 0);
-         clrtoeol();
-         wmove(stdscr,yPos,xPos);
+      // Paste
+      case 'p':
+         if(mode == 'v' && strlen(copyString) != 0) {
+            paste(stdscr, page, copyString);
+         }
          break;
 
-      case 8:
-      case 127:
+      // Delete a character
       case KEY_BACKSPACE:
          backspace(stdscr, row, page, yPos, xPos, MAX_COLS);
          break;
 
       // ENTER KEY FUNCTIONALITY
       case 10:
-          // clear each line and update with the new page lines
-          if(yPos < row-3) {
-            newLine(page, row, xPos, yPos);
+      case KEY_ENTER:
+          if(mode == 'e') {
+            // clear each line and update with the new page lines
+            if(yPos < row - 3) {
+              newLine(page, row, xPos, yPos);
 
-            for(int i = 1; i < row-2; i++) {
-              wmove(stdscr, i, 0);
-              clrtoeol();
-              mvwprintw(stdscr, i, 0, page->lines[i]);
+              for(int i = 1; i < row-2; i++) {
+                 wmove(stdscr, i, 0);
+                 clrtoeol();
+                 mvwprintw(stdscr, i, 0, page->lines[i]);
+              }
+              // move the cursor to the beginning of the next line
+              wmove(stdscr, yPos + 1, 0);
             }
-            // move the cursor to the beginning of the second line
-            mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos+1, 0);
-            wmove(stdscr,yPos+1,0);
+          }
+          if(mode == 'v') {
+            copy(page, yPos, old_x, xPos, copyString);
+            mvwprintw(stdscr, row - 2, 0, "Copied string '%s'.", copyString);
+            wmove(stdscr, yPos, xPos);
           }
           break;
 
-      // Press 'F4' key to switch find and replace
+      // Find value
+      case KEY_F(3):
+         // Enable find and replace only in command mode.
+         if (mode == 'c') {
+            find_and_replace(stdscr, page, findOnly);
+            break;
+         }
+
+      // Find and replace
       case KEY_F(4):
          if (mode == 'c') {
            find_and_replace(stdscr, page, findAndReplace);
            break;
          }
-      case '?': break;
-      default: 
-         if( ch >= 32 && ch <= 126 && xPos+1 < MAX_COLS) {
-            if(mode == 'c') {
-              if(ch ==  'w') {
-                saveFile(page, fileName);
-                mvwprintw(stdscr, row-2, 0, "Saved file %s\n", fileName);
-                wmove(stdscr, yPos, xPos);
-              }
-              if(ch == 'q') {
-                return -1;
-              }
-              if(ch == 'd' && !*dFirst) {
-                *dFirst = 1;
-                return 0;
-              }
-              if(ch == 'd' && *dFirst && page->numRows > 0) {
-                deleteLine(page, row, xPos, yPos);
-                // clear each line and update with the new page lines
-                for(int i = 1; i < row-2; i++) {
-                  wmove(stdscr, i, 0);
-                  clrtoeol();
-                  mvwprintw(stdscr, i, 0, page->lines[i]);
-                }
-                mvwprintw(stdscr, yPos, xPos, "%d", page->numRows);
-                if(yPos < page->numRows+2)
-                  wmove(stdscr, yPos, xPos);
-                else
-                  wmove(stdscr, yPos-1, xPos);
-                *dFirst = 0;
-              }
-            }
-            else {
-              insertChar(page, yPos, xPos, ch);
-              mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
-              mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos+1);
-              wmove(stdscr,yPos,xPos+1);
-            }
-         }
-         break;
+
+      case '?':
+      default: break;
    }
-   //wrefresh(stdscr);
+   // Continue to next input
    return 0;
 }
-
 
 int main(int argc, char* argv[]) {
 
@@ -190,56 +206,91 @@ int main(int argc, char* argv[]) {
    // Else run the editor
    int ch,
        mode = 'c';
-   int y, x, justChanged = 0, dFirst = 0;
+   int y, x;
+   bool dFirst = false;
    fileName = argv[1];
 
+   // Configure application
    initscr();
    noecho();
    cbreak();
    keypad(stdscr, TRUE);
+
+   // Get the maximum window dimensions
    getmaxyx(stdscr, row, col);
 
-   // Create a page with the dimensions for the screen
+   // Set the boundaries for the cursor position
+   getyx(stdscr, y, x);
+
+   // Create a page datastructure with the dimensions for the screen
    Page page = pageInit(row, col);
 
    // Header line
-   mvwprintw(stdscr,0,0,"Group #3, editing file %s", fileName);
+   mvwprintw(stdscr, 0, 0, "Group #3, editing file %s", fileName);
    wmove(stdscr, 0, x);
 
    // Open the file and load the contents into the page.
    loadFile(&page, fileName);
-   updateView(&page);
+   initView(&page);
 
+   // Header line
+   mvwprintw(stdscr, 0, 0, "Group #3, editing file %s", fileName);
+   wmove(stdscr, 1, x);
+
+   // Continue to get an input until q is provided in command mode.
    while((ch = getch())) {
       getyx(stdscr, y, x);
 
-      // Manage mode changes
-      if (mode != 'e'
-         && ch == 'e') { mode = 'e'; justChanged = 1; }
+      // Manage mode changes:
 
-      if (mode != 'c'
-         && ch == 27) mode = 'c';
+      // ESC key sets mode to command
+      if (ch == 27) {
+         mode = 'c';
+         // Clear the mode status
+         mvwprintw(stdscr, row - 2, 0, "                        ", y, x);
+         mvwchgat(stdscr, y, x, 1, A_NORMAL, 0, NULL);
 
-      //if (mode == 'e') editing(stdscr, &page);
+         for(int i = 1; i < row-2; i++) {
+             wmove(stdscr, i, 0);
+             clrtoeol();
+             mvwprintw(stdscr, i, 0, page.lines[i]);
+         }
+         // move the cursor to the beginning of the next line
+         wmove(stdscr, y, x);
 
-      // Arrowkey navigation restricted to within
-      // valid text area.
-      if (driver(ch, mode, x, y, &page, justChanged, &dFirst) < 0) break;
+         continue;
+      }
+
+      // Set editing mode
+      if (mode == 'c' && ch == 'e') {
+         mode = 'e';
+         mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", y, x);
+         mvwchgat(stdscr, y, x, 1, A_NORMAL, 0, NULL);
+         continue;
+      }
+
+      // Set visual mode
+      if (mode == 'c' && ch == 'v') {
+         mode = 'v';
+         old_x = x;
+         mvwprintw(stdscr, row - 2, 0, "----Visual---- %d, %d  ", y, x);
+         mvwchgat(stdscr, y, x, 1, A_NORMAL, 0, NULL);
+         continue;
+      }
+
+      if (driver(ch, mode, x, y, &page, &dFirst) < 0) break;
       else refresh();
-      justChanged = 0;
    }
    freePage(&page);
    endwin();
    return 0;
 }
 
-void updateView(Page* page) {
+void initView(Page* page) {
    int rowCount = page->numRows;
-   for(int i = 0; i < rowCount+2; i++) {
-     if(i == rowCount+1)
-         printw(page->lines[i]);
-     else
-         printw(strcat(page->lines[i], "\n"));
+   for(int i = 0; i < rowCount + 2; i++) {
+     if (i == rowCount + 1) printw(page->lines[i]);
+     else printw(strcat(page->lines[i], "\n"));
    }
    refresh();
 }

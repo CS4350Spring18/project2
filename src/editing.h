@@ -1,3 +1,7 @@
+//***********************************************/
+// editing.h:
+//   Manage inserting and removing characters from the page.
+//***********************************************
 #pragma once
 #include <stdio.h>
 #include <string.h>

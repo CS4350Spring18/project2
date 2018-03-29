@@ -1,4 +1,3 @@
-hello 
-yah 
 
-man
+
+testing strings over here
