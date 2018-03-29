@@ -24,7 +24,7 @@ void setRow(Page* page, int row, char line[]) {
    strncpy(page->lines[row], line, page->sizes[row]);
 }
 
-void backspace(WINDOW* stdscr, int row Page* page, int yPos, int xPos, int MAX_COLS) {
+void backspace(WINDOW* stdscr, int row, Page* page, int yPos, int xPos, int MAX_COLS) {
    // If not at the left side of the line
    if(xPos != 0) {
      mvwprintw(stdscr,yPos,xPos-1," ");
