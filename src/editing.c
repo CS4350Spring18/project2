@@ -30,7 +30,7 @@ void backspace(WINDOW* stdscr, int row, Page* page, int yPos, int xPos, int MAX_
      mvwprintw(stdscr,yPos,xPos-1," ");
      // backspace(page, yPos, xPos-1);
      int size = page->sizes[yPos];
-     for(int i = xPos; i < size+1; i++)
+     for(int i = xPos-1; i < size+1; i++)
        page->lines[yPos][i] = page->lines[yPos][i+1];
      page->sizes[yPos] = size - 1;
      wmove(stdscr,yPos,xPos);
@@ -75,5 +75,5 @@ void backspace(WINDOW* stdscr, int row, Page* page, int yPos, int xPos, int MAX_
    else {
      mvwprintw(stdscr,row-1,0,"Error: row would be too long if append happens.");
      wmove(stdscr,yPos,xPos);
-}
+   }
 }
