@@ -181,13 +181,18 @@ int main(int argc, char* argv[]) {
    // Create a page datastructure with the dimensions for the screen
    Page page = pageInit(row, col);
 
-   // Header line
+   // Header line (this wasn't showing up until the first char click
+   // so I added it again. Not sure if it was working on Ubuntu)
    mvwprintw(stdscr, 0, 0, "Group #3, editing file %s", fileName);
    wmove(stdscr, 0, x);
 
    // Open the file and load the contents into the page.
    loadFile(&page, fileName);
    initView(&page);
+
+   // Header line
+   mvwprintw(stdscr, 0, 0, "Group #3, editing file %s", fileName);
+   wmove(stdscr, page.numRows+1, x);
 
    // Continue to get an input until q is provided in command mode.
    while((ch = getch())) {
