@@ -9,10 +9,13 @@
 #include "find.h"
 #include "newline.h"
 #include "deleteline.h"
+#include "copypaste.h"
 
 static int row;
 static int col;
 static char* fileName;
+static char* copyString[50];
+static int old_x, new_x;
 
 void initView(Page* page);
 
@@ -43,6 +46,9 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst
             if(mode == 'e') {
                mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos-1, xPos);
             }
+            if(mode == 'v') {
+               break;
+            }
             wmove(stdscr, yPos - 1, xPos);
          }
          break;
@@ -55,6 +61,9 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst
          if(mode == 'e') {
             mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos+1, xPos);
          }
+         if(mode == 'v') {
+            break;
+         }
          wmove(stdscr, yPos + 1, xPos);
          break;
 
@@ -63,6 +72,9 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst
          if(xPos != 0) {
             if(mode == 'e') {
                mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos, xPos-1);
+            }
+            if(mode == 'v') {
+               mvwprintw(stdscr, row - 2, 0, "----Visual---- %d, %d  ", yPos, xPos-1);
             }
             wmove(stdscr, yPos, xPos - 1);
          }
@@ -73,7 +85,10 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst
          if(xPos + 1 < MAX_COLS) {
             if (xPos < page->sizes[yPos]) {
                if(mode == 'e') {
-                  mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos, xPos);
+                  mvwprintw(stdscr, row - 2, 0, "----Editing---- %d, %d  ", yPos, xPos+1);
+               }
+               if(mode == 'v') {
+                  mvwprintw(stdscr, row - 2, 0, "----Visual---- %d, %d  ", yPos, xPos+1);
                }
                wmove(stdscr, yPos, xPos + 1);
             }
@@ -130,17 +145,23 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, bool *dFirst
       // ENTER KEY FUNCTIONALITY
       case 10:
       case KEY_ENTER:
-          // clear each line and update with the new page lines
-          if(yPos < row - 3) {
-            newLine(page, row, xPos, yPos);
+          if(mode == 'e') {
+            // clear each line and update with the new page lines
+            if(yPos < row - 3) {
+              newLine(page, row, xPos, yPos);
 
-            for(int i = 1; i < row-2; i++) {
-               wmove(stdscr, i, 0);
-               clrtoeol();
-               mvwprintw(stdscr, i, 0, page->lines[i]);
+              for(int i = 1; i < row-2; i++) {
+                 wmove(stdscr, i, 0);
+                 clrtoeol();
+                 mvwprintw(stdscr, i, 0, page->lines[i]);
+              }
+              // move the cursor to the beginning of the next line
+              wmove(stdscr, yPos + 1, 0);
             }
-            // move the cursor to the beginning of the next line
-            wmove(stdscr, yPos + 1, 0);
+          }
+          if(mode == 'v') {
+            copyString = copy(page, yPos, old_x, xPos);
+            mvwprintw(stdscr, row - 2, 0, "Copied string '%s'.", copyString);
           }
           break;
 
@@ -197,8 +218,7 @@ int main(int argc, char* argv[]) {
    // Create a page datastructure with the dimensions for the screen
    Page page = pageInit(row, col);
 
-   // Header line (this wasn't showing up until the first char click
-   // so I added it again. Not sure if it was working on Ubuntu)
+   // Header line
    mvwprintw(stdscr, 0, 0, "Group #3, editing file %s", fileName);
    wmove(stdscr, 0, x);
 
@@ -208,7 +228,7 @@ int main(int argc, char* argv[]) {
 
    // Header line
    mvwprintw(stdscr, 0, 0, "Group #3, editing file %s", fileName);
-   wmove(stdscr, page.numRows+1, x);
+   wmove(stdscr, 0, x);
 
    // Continue to get an input until q is provided in command mode.
    while((ch = getch())) {
@@ -245,6 +265,7 @@ int main(int argc, char* argv[]) {
       // Set visual mode
       if (mode == 'c' && ch == 'v') {
          mode = 'v';
+         old_x = x;
          mvwprintw(stdscr, row - 2, 0, "----Visual---- %d, %d  ", y, x);
          mvwchgat(stdscr, y, x, 1, A_NORMAL, 0, NULL);
          continue;
