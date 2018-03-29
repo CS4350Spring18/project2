@@ -1,12 +1,12 @@
 #include "find.h"
 
-void exit_find_mode(WINDOW * win) {
+void exit_find_mode(WINDOW * win, int y, int x) {
    int row, col;
    getmaxyx(win, row, col);
 
    mvwprintw(win, row - 2, 0, "                                                     ");
    mvwprintw(win, row - 1, 0, "                                                     ");
-   wmove(win, 0, 0);
+   wmove(win, y, x);
    wrefresh(win);
 }
 
@@ -182,7 +182,7 @@ void find_and_replace(WINDOW *win, Page *page, FindMode findMode) {
    while ((key = getch())) {
       // Return when Esc is pressed
       if (key == 27) {
-         exit_find_mode(win);
+         exit_find_mode(win, y, x);
          return;
       }
       switch(mode) {
@@ -190,7 +190,7 @@ void find_and_replace(WINDOW *win, Page *page, FindMode findMode) {
             if (handle_search_input(win, page, key, searchString, &searchStrPos))
                if (findMode == findAndReplace) mode = replaceInput;
             else {
-               exit_find_mode(win);
+               exit_find_mode(win, y, x);
                return;
             }
             break;

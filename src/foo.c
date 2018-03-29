@@ -206,6 +206,15 @@ int main(int argc, char* argv[]) {
          // Clear the mode status
          mvwprintw(stdscr, row - 2, 0, "                        ", y, x);
          mvwchgat(stdscr, y, x, 1, A_NORMAL, 0, NULL);
+
+         for(int i = 1; i < row-2; i++) {
+             wmove(stdscr, i, 0);
+             clrtoeol();
+             mvwprintw(stdscr, i, 0, page.lines[i]);
+         }
+         // move the cursor to the beginning of the next line
+         wmove(stdscr, y, x);
+
          continue;
       }
 
