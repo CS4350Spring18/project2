@@ -1,5 +1,5 @@
 //****************************/
-// page_init.h 
+// page_ops.h 
 //
 // Design:
 //   Initialize the rows and columns inside

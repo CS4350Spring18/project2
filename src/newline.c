@@ -13,7 +13,7 @@ void newLine(Page* page, int row, int xPos, int yPos) {
         page->lines[i][j] = page->lines[i-1][j];
       page->sizes[i] = page->sizes[i-1];
     }
-    
+
     int line_size = 0;
     if(page->sizes[yPos] > page->sizes[yPos+1])
       line_size = page->sizes[yPos];
@@ -24,10 +24,8 @@ void newLine(Page* page, int row, int xPos, int yPos) {
       page->lines[yPos][i] = '\0';
     }
     page->lines[yPos][xPos] = '\n';
-
     page->sizes[yPos+1] = page->sizes[yPos] -  xPos;
     page->sizes[yPos] = xPos;
-
     page->numRows++;
   }
 }
