@@ -110,41 +110,22 @@ static int driver(int ch, int mode, int xPos, int yPos, Page* page, int justChan
          // If not at the left side of the line
          if(xPos != 0) {
            mvwprintw(stdscr,yPos,xPos-1," ");
-           backspace(page, yPos, xPos-1);
+           backspace(page, yPos, xPos-1, MAX_COLS);
            wmove(stdscr,yPos,xPos);
            clrtoeol();
            mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
+           mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos, xPos-1);
            wmove(stdscr,yPos,xPos-1);
          }
          // If at the left side of the string, need to append lines
          else if(yPos > 1 && page->sizes[yPos-1] + page->sizes[yPos] + 1 < MAX_COLS) {
-           for(int i = 0; i < page->sizes[yPos]; i++) {
-             page->lines[yPos-1][page->sizes[yPos-1]+i] = page->lines[yPos][i];
-           }
-           int old_xPos = page->sizes[yPos-1];
-           page->sizes[yPos-1] = page->sizes[yPos-1] + page->sizes[yPos];
-           mvwprintw(stdscr, yPos-1, 0, page->lines[yPos-1]);
-           mvwprintw(stdscr, yPos, 0, page->lines[yPos]);
-           
-           // move each line up one for the page
-           for(int i = yPos; i < row-3; i++) {
-             int size = 0;
-             if(page->sizes[i] > page->sizes[i+1])
-                 size = page->sizes[i];
-             else
-                 size = page->sizes[i+1];
-             for(int j = 0; j <= size; j++)
-                 page->lines[i][j] = page->lines[i+1][j];
-             page->sizes[i] = page->sizes[i+1];
-           }
-
+           backspace(page, yPos, xPos-1, MAX_COLS);
            // clear each line and update with the new page lines
            for(int i = 1; i < row-2; i++) {
              wmove(stdscr, i, 0);
              clrtoeol();
              mvwprintw(stdscr, i, 0, page->lines[i]);
            }
-           page->numRows--;
            // move the cursor to the beginning of the second line
            mvwprintw(stdscr,row-2,0,"----Editing---- %d, %d  ", yPos-1, page->sizes[yPos-1]);
            wmove(stdscr,yPos-1,old_xPos);

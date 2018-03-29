@@ -39,6 +39,7 @@ void setRow(Page* page, int row, char line[]);
 //   page: Refernce to Page object to initiate
 //   row: row # of the position of the character
 //   col: column # of the position of the character
+//   MAX_COLS: maximum number of columns
 //
 //***********************************************/
-void backspace(Page* page, int row, int col);
+void backspace(Page* page, int row, int col, int MAX_COLS);
